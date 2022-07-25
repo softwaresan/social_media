@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:social_media/src/model/social_user_model.dart';
 import 'package:social_media/src/widgets/widgets.dart';
 
 class Register extends StatefulWidget {
@@ -12,7 +14,7 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  late String _password, _email;
+  late String _password, _email, _name, _phone;
   final auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,20 @@ class _RegisterState extends State<Register> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     text("Register", 30),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          _name = value.toString();
+                        });
+                      },
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person),
+                          border: OutlineInputBorder(),
+                          label: Text("Name")),
+                    ),
                     SizedBox(
                       height: 25,
                     ),
@@ -60,10 +76,35 @@ class _RegisterState extends State<Register> {
                     SizedBox(
                       height: 25,
                     ),
+                    TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          _phone = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.phone),
+                        border: OutlineInputBorder(),
+                        label: Text("Phone"),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 25,
+                    ),
                     GestureDetector(
                       onTap: () {
-                        auth.createUserWithEmailAndPassword(
-                            email: _email, password: _password);
+                        auth
+                            .createUserWithEmailAndPassword(
+                                email: _email, password: _password)
+                            .then((value) => FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(value.user?.uid)
+                                .set(SocialUser(
+                                        name: _name,
+                                        email: _email,
+                                        phone: _phone,
+                                        uid: value.user?.uid)
+                                    .toMap()));
                       },
                       child: Container(
                         child: Center(

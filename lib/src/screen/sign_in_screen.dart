@@ -64,12 +64,18 @@ class _SignInState extends State<SignIn> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        auth.signInWithEmailAndPassword(
-                            email: _email, password: _password);
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return HomePage();
-                        }));
+                        auth
+                            .signInWithEmailAndPassword(
+                                email: _email, password: _password)
+                            .then((value) => Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return HomePage();
+                                })))
+                            .catchError((error) => showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return Text(error.toString());
+                                }));
                       },
                       child: Container(
                         child: Center(

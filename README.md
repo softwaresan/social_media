@@ -16,10 +16,15 @@ Like and comment on others post
 
 ## To Do
 [ ] Authentication
+
 [ ] splash/logo screen
+
 [ ] Home page
+
 [ ] profile screen
+
 [ ] settings
+
 [ ] chat
 
 
