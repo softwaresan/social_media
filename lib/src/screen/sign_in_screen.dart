@@ -67,7 +67,7 @@ class _SignInState extends State<SignIn> {
                         auth
                             .signInWithEmailAndPassword(
                                 email: _email, password: _password)
-                            .then((value) => Navigator.push(context,
+                            .then((value) => Navigator.pushReplacement(context,
                                     MaterialPageRoute(builder: (context) {
                                   return HomePage();
                                 })))

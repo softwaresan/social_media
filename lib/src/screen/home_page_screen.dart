@@ -9,18 +9,46 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: Provider.of<MyProvider>(context).currentIndex,
-          type: BottomNavigationBarType.fixed,
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.settings), label: "settings")
-          ],
-        ));
+    return SafeArea(
+      child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: Text("Home", style: Theme.of(context).textTheme.subtitle1),
+            actions: [
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.chat_outlined,
+                    color: Colors.black,
+                  )),
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.add_a_photo_outlined,
+                    color: Colors.black,
+                  ))
+            ],
+          ),
+          body: Provider.of<MyProvider>(context)
+              .screens[Provider.of<MyProvider>(context).currentIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: Provider.of<MyProvider>(context).currentIndex,
+            type: BottomNavigationBarType.fixed,
+            onTap: (index) {
+              Provider.of<MyProvider>(context, listen: false)
+                  .changeScreen(index);
+            },
+            items: [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.search), label: "Search"),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person), label: "Profile"),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.settings), label: "settings")
+            ],
+          )),
+    );
   }
 }
