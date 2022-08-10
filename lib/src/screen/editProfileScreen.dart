@@ -1,13 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:provider/provider.dart';
+import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/model/social_user_model.dart';
 
 class EditProfile extends StatelessWidget {
-  const EditProfile({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    SocialUser? _socialUser = Provider.of<MyProvider>(context).socialUser!;
     return SafeArea(
         child: Scaffold(
             backgroundColor: Colors.white,
@@ -27,36 +31,51 @@ class EditProfile extends StatelessWidget {
                   SizedBox(width: 10)
                 ]),
             body: Column(children: [
-              Stack(clipBehavior: Clip.none, children: [
-                SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                  child: Image.network(
-                    "https://images.unsplash.com/photo-1530878955558-a6c31b9c97db?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8bmljZXxlbnwwfHwwfHw%3D&w=1000&q=80",
-                    fit: BoxFit.fill,
+              SizedBox(
+                height: 245,
+                child:
+                    Stack(alignment: AlignmentDirectional.topCenter, children: [
+                  SizedBox(
+                    height: 200,
+                    width: double.infinity,
+                    child: Image.network(
+                      _socialUser.coverImg,
+                      fit: BoxFit.fill,
+                    ),
                   ),
-                ),
-                Align(
-                    alignment: Alignment.topRight,
-                    child: CircleAvatar(child: Icon(Icons.camera_alt))),
-                Positioned(
-                  top: 120,
-                  left: 140,
-                  child: Stack(alignment: Alignment.bottomRight, children: [
-                    CircleAvatar(
-                        radius: 65,
-                        backgroundColor: Colors.white,
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundImage: NetworkImage(
-                              "https://i.pinimg.com/736x/5b/ad/9b/5bad9bd6915b96afddd0f5e85ddb8656.jpg"),
-                        )),
-                    CircleAvatar(
-                      child: Icon(Icons.camera_alt),
-                    )
-                  ]),
-                )
-              ]),
+                  Align(
+                      alignment: Alignment.topRight,
+                      child: CircleAvatar(
+                          child: IconButton(
+                              onPressed: () {}, icon: Icon(Icons.camera_alt)))),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Stack(alignment: Alignment.bottomRight, children: [
+                      CircleAvatar(
+                          radius: 65,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundImage:
+                                Provider.of<MyProvider>(context).path != null
+                                    ? FileImage(File(
+                                        Provider.of<MyProvider>(context).path!))
+                                    : NetworkImage(_socialUser.profileImg)
+                                        as ImageProvider,
+                          )),
+                      IconButton(
+                        onPressed: () {
+                          Provider.of<MyProvider>(context, listen: false)
+                              .changeProfilePic();
+                        },
+                        icon: CircleAvatar(
+                          child: Icon(Icons.camera_alt),
+                        ),
+                      )
+                    ]),
+                  )
+                ]),
+              ),
             ])));
   }
 }

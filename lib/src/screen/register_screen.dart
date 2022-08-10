@@ -15,6 +15,12 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   late String _password, _email, _name, _phone;
+  String _profileImg =
+      "https://i.pinimg.com/736x/5b/ad/9b/5bad9bd6915b96afddd0f5e85ddb8656.jpg";
+  String _coverImg =
+      "https://i.pinimg.com/736x/5b/ad/9b/5bad9bd6915b96afddd0f5e85ddb8656.jpg";
+  String _bio = "this is my bio";
+
   final auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
@@ -103,7 +109,10 @@ class _RegisterState extends State<Register> {
                                         name: _name,
                                         email: _email,
                                         phone: _phone,
-                                        uid: value.user?.uid)
+                                        uid: value.user?.uid,
+                                        profileImg: _profileImg,
+                                        coverImg: _coverImg,
+                                        bio: _bio)
                                     .toMap()));
                       },
                       child: Container(

@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:images_picker/images_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/screen/home_page_screen.dart';
 import 'package:social_media/src/screen/register_screen.dart';
 import 'package:social_media/src/widgets/widgets.dart';
@@ -14,6 +19,7 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  String path = "";
   late String _email, _password;
   final auth = FirebaseAuth.instance;
   @override
@@ -63,19 +69,39 @@ class _SignInState extends State<SignIn> {
                       height: 25,
                     ),
                     GestureDetector(
-                      onTap: () {
-                        auth
-                            .signInWithEmailAndPassword(
-                                email: _email, password: _password)
-                            .then((value) => Navigator.pushReplacement(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return HomePage();
-                                })))
-                            .catchError((error) => showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return Text(error.toString());
-                                }));
+                      onTap: () async {
+                        UserCredential? userCredential;
+                        try {
+                          userCredential = await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                                  email: _email, password: _password);
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'user-not-found') {
+                            print('No user found for that email.');
+                          } else if (e.code == 'wrong-password') {
+                            print('Wrong password provided for that user.');
+                          }
+                        }
+
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) {
+                          return HomePage();
+                        }));
+                        // auth
+                        //     .signInWithEmailAndPassword(
+                        //         email: _email, password: _password)
+                        //     .then((value) {
+
+                        //   Provider.of<MyProvider>(context, listen: false)
+                        //       .getUserData(value.user?.uid);
+
+                        //   return Navigator.pushReplacement(context,
+                        //       MaterialPageRoute(builder: (context) {
+                        //     return HomePage();
+                        //   }));
+                        // }).catchError((error) {
+                        //   print("error");
+                        // });
                       },
                       child: Container(
                         child: Center(
@@ -107,9 +133,9 @@ class _SignInState extends State<SignIn> {
                             }));
                           },
                           child: text("Register", 20),
-                        )
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
