@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:social_media/src/model/social_user_model.dart';
 import 'package:social_media/src/screen/profile.dart';
@@ -11,7 +14,9 @@ import '../screen/home.dart';
 
 class MyProvider with ChangeNotifier {
   int currentIndex = 0;
-  String? path;
+  String? profilePicPath;
+  String? coverPicPath;
+
   List<Widget> screens = [Home(), Search(), Profile(), const Setting()];
   void changeScreen(int index) {
     currentIndex = index;
@@ -19,6 +24,8 @@ class MyProvider with ChangeNotifier {
   }
 
   SocialUser? socialUser;
+  String? tempCoverImg;
+  String? tempProfileImg;
   void getUserData() {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final uId = auth.currentUser!.uid;
@@ -27,6 +34,65 @@ class MyProvider with ChangeNotifier {
       socialUser = SocialUser.fromMap(value.data()!);
       notifyListeners();
     });
+  }
+
+  updateUserProfile(context) async {
+    if (coverPicPath != null) {
+      await uploadCoverPic().then((value) => tempCoverImg = value);
+    }
+    if (profilePicPath != null) {
+      await uploadProfilePic().then((value) => tempProfileImg = value);
+    }
+    socialUser!.coverImg =
+        tempCoverImg == null ? socialUser!.coverImg : tempCoverImg!;
+    socialUser!.profileImg =
+        tempProfileImg == null ? socialUser!.profileImg : tempProfileImg!;
+
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .update(socialUser!.toMap());
+    Navigator.pop(context);
+
+    getUserData();
+    coverPicPath = null;
+    profilePicPath = null;
+  }
+
+  Future<String> uploadCoverPic() async {
+    var ref = await FirebaseStorage.instance
+        .ref()
+        .child("CoverPic/${Uri.file(coverPicPath!).pathSegments.last}")
+        .putFile(File(coverPicPath!));
+    return await ref.ref.getDownloadURL();
+  }
+
+  Future<String> uploadProfilePic() async {
+    var ref = await FirebaseStorage.instance
+        .ref()
+        .child("profilePic/${Uri.file(profilePicPath!).pathSegments.last}")
+        .putFile(File(profilePicPath!));
+    return await ref.ref.getDownloadURL();
+  }
+
+  changeCoverPic() async {
+    List<Media>? res = await ImagesPicker.pick(
+      pickType: PickType.all,
+      language: Language.System,
+      maxTime: 30,
+      // maxSize: 500,
+      cropOpt: CropOption(
+        // aspectRatio: CropAspectRatio.wh16x9,
+        cropType: CropType.circle,
+      ),
+    );
+    if (res != null) {
+      coverPicPath = res[0].thumbPath;
+
+      notifyListeners();
+      // bool status = await ImagesPicker.saveImageToAlbum(File(res[0]?.path));
+      // print(status);
+    }
   }
 
   changeProfilePic() async {
@@ -41,7 +107,7 @@ class MyProvider with ChangeNotifier {
       ),
     );
     if (res != null) {
-      path = res[0].thumbPath;
+      profilePicPath = res[0].thumbPath;
 
       notifyListeners();
       // bool status = await ImagesPicker.saveImageToAlbum(File(res[0]?.path));

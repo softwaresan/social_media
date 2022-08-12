@@ -27,7 +27,12 @@ class EditProfile extends StatelessWidget {
                 title: Text("EDIT PROFILE",
                     style: Theme.of(context).textTheme.subtitle1),
                 actions: [
-                  TextButton(onPressed: () {}, child: Text("UPDATE")),
+                  TextButton(
+                      onPressed: () {
+                        Provider.of<MyProvider>(context, listen: false)
+                            .updateUserProfile(context);
+                      },
+                      child: Text("UPDATE")),
                   SizedBox(width: 10)
                 ]),
             body: Column(children: [
@@ -36,18 +41,28 @@ class EditProfile extends StatelessWidget {
                 child:
                     Stack(alignment: AlignmentDirectional.topCenter, children: [
                   SizedBox(
-                    height: 200,
-                    width: double.infinity,
-                    child: Image.network(
-                      _socialUser.coverImg,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
+                      height: 200,
+                      width: double.infinity,
+                      child:
+                          Provider.of<MyProvider>(context).coverPicPath != null
+                              ? Image.file(
+                                  File(Provider.of<MyProvider>(context)
+                                      .coverPicPath!),
+                                  fit: BoxFit.fill,
+                                )
+                              : Image.network(
+                                  _socialUser.coverImg,
+                                  fit: BoxFit.fill,
+                                )),
                   Align(
                       alignment: Alignment.topRight,
                       child: CircleAvatar(
                           child: IconButton(
-                              onPressed: () {}, icon: Icon(Icons.camera_alt)))),
+                              onPressed: () {
+                                Provider.of<MyProvider>(context, listen: false)
+                                    .changeCoverPic();
+                              },
+                              icon: Icon(Icons.camera_alt)))),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Stack(alignment: Alignment.bottomRight, children: [
@@ -56,12 +71,14 @@ class EditProfile extends StatelessWidget {
                           backgroundColor: Colors.white,
                           child: CircleAvatar(
                             radius: 60,
-                            backgroundImage:
-                                Provider.of<MyProvider>(context).path != null
-                                    ? FileImage(File(
-                                        Provider.of<MyProvider>(context).path!))
-                                    : NetworkImage(_socialUser.profileImg)
-                                        as ImageProvider,
+                            backgroundImage: Provider.of<MyProvider>(context)
+                                        .profilePicPath !=
+                                    null
+                                ? FileImage(File(
+                                    Provider.of<MyProvider>(context)
+                                        .profilePicPath!))
+                                : NetworkImage(_socialUser.profileImg)
+                                    as ImageProvider,
                           )),
                       IconButton(
                         onPressed: () {

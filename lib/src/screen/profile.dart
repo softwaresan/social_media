@@ -10,8 +10,7 @@ import 'package:social_media/src/screen/editProfileScreen.dart';
 class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SocialUser? _socialUser =
-        Provider.of<MyProvider>(context, listen: false).socialUser!;
+    SocialUser? _socialUser = Provider.of<MyProvider>(context).socialUser!;
 
     return Column(children: [
       Stack(
