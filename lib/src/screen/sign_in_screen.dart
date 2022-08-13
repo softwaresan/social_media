@@ -75,6 +75,8 @@ class _SignInState extends State<SignIn> {
                           userCredential = await FirebaseAuth.instance
                               .signInWithEmailAndPassword(
                                   email: _email, password: _password);
+                          Provider.of<MyProvider>(context, listen: false)
+                              .currentIndex = 0;
                         } on FirebaseAuthException catch (e) {
                           if (e.code == 'user-not-found') {
                             print('No user found for that email.');

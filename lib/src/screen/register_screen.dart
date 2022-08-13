@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:social_media/src/model/social_user_model.dart';
+import 'package:social_media/src/screen/sign_in_screen.dart';
 import 'package:social_media/src/widgets/widgets.dart';
 
 class Register extends StatefulWidget {
@@ -113,7 +114,8 @@ class _RegisterState extends State<Register> {
                                         profileImg: _profileImg,
                                         coverImg: _coverImg,
                                         bio: _bio)
-                                    .toMap()));
+                                    .toMap()))
+                            .then((value) => Navigator.pop(context));
                       },
                       child: Container(
                         child: Center(

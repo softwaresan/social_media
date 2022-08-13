@@ -15,10 +15,9 @@ class Setting extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () async {
-        await FirebaseAuth.instance.signOut();
+        await Provider.of<MyProvider>(context, listen: false).userSignOut();
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          Provider.of<MyProvider>(context).currentIndex = 0;
           return SignIn();
         }));
       },

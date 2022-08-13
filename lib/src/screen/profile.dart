@@ -58,6 +58,15 @@ class Profile extends StatelessWidget {
                 style: ElevatedButton.styleFrom(primary: Colors.white))),
         ElevatedButton(
             onPressed: () {
+              Provider.of<MyProvider>(context, listen: false)
+                  .nameController
+                  .text = _socialUser.name;
+              Provider.of<MyProvider>(context, listen: false)
+                  .bioController
+                  .text = _socialUser.bio;
+              Provider.of<MyProvider>(context, listen: false)
+                  .phoneController
+                  .text = _socialUser.phone;
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return EditProfile();
               }));

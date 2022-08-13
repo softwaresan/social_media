@@ -13,7 +13,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MyProvider()),
+        ChangeNotifierProvider(
+          create: (_) => MyProvider(),
+        ),
       ],
       child: MyApp(),
     ),

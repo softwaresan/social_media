@@ -7,6 +7,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/model/social_user_model.dart';
+import 'package:social_media/src/widgets/customTextField.dart';
 
 class EditProfile extends StatelessWidget {
   @override
@@ -93,6 +94,32 @@ class EditProfile extends StatelessWidget {
                   )
                 ]),
               ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomTextField(
+                  hint: "New Name",
+                  prefixIcon: Icons.person,
+                  newController:
+                      Provider.of<MyProvider>(context).nameController,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomTextField(
+                  hint: "New Phone Number",
+                  prefixIcon: Icons.phone,
+                  newController:
+                      Provider.of<MyProvider>(context).phoneController,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomTextField(
+                  hint: "New Bio",
+                  prefixIcon: Icons.question_mark_outlined,
+                  newController: Provider.of<MyProvider>(context).bioController,
+                ),
+              )
             ])));
   }
 }

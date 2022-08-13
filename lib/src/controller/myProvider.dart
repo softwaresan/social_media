@@ -43,6 +43,9 @@ class MyProvider with ChangeNotifier {
     if (profilePicPath != null) {
       await uploadProfilePic().then((value) => tempProfileImg = value);
     }
+    updateName();
+    updateBio();
+    updatePhone();
     socialUser!.coverImg =
         tempCoverImg == null ? socialUser!.coverImg : tempCoverImg!;
     socialUser!.profileImg =
@@ -54,9 +57,11 @@ class MyProvider with ChangeNotifier {
         .update(socialUser!.toMap());
     Navigator.pop(context);
 
-    getUserData();
     coverPicPath = null;
     profilePicPath = null;
+    nameController.text = "";
+    phoneController.text = "";
+    bioController.text = "";
   }
 
   Future<String> uploadCoverPic() async {
@@ -113,5 +118,26 @@ class MyProvider with ChangeNotifier {
       // bool status = await ImagesPicker.saveImageToAlbum(File(res[0]?.path));
       // print(status);
     }
+  }
+
+  TextEditingController nameController = TextEditingController();
+  updateName() {
+    socialUser!.name = nameController.text;
+  }
+
+  TextEditingController phoneController = TextEditingController();
+
+  updatePhone() {
+    socialUser!.phone = phoneController.text;
+  }
+
+  TextEditingController bioController = TextEditingController();
+
+  updateBio() {
+    socialUser!.bio = bioController.text;
+  }
+
+  userSignOut() async {
+    await FirebaseAuth.instance.signOut();
   }
 }
