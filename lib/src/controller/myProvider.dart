@@ -4,11 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:social_media/src/model/postModel.dart';
+import 'package:social_media/src/model/publicPostModel.dart';
 import 'package:social_media/src/model/social_user_model.dart';
 import 'package:social_media/src/screen/profile.dart';
 import 'package:social_media/src/screen/search.dart';
 import 'package:social_media/src/screen/settings.dart';
 import 'package:images_picker/images_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import '../screen/home.dart';
 
@@ -16,6 +19,7 @@ class MyProvider with ChangeNotifier {
   int currentIndex = 0;
   String? profilePicPath;
   String? coverPicPath;
+  String? postImage;
 
   List<Widget> screens = [Home(), Search(), Profile(), const Setting()];
   void changeScreen(int index) {
@@ -29,9 +33,11 @@ class MyProvider with ChangeNotifier {
   void getUserData() {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final uId = auth.currentUser!.uid;
+    final user = FirebaseFirestore.instance.collection("users").doc(uId);
 
-    FirebaseFirestore.instance.collection("users").doc(uId).get().then((value) {
+    user.get().then((value) {
       socialUser = SocialUser.fromMap(value.data()!);
+
       notifyListeners();
     });
   }
@@ -140,4 +146,88 @@ class MyProvider with ChangeNotifier {
   userSignOut() async {
     await FirebaseAuth.instance.signOut();
   }
+
+  String? newPostPath;
+  newPostFromGallery() async {
+    List<Media>? res = await ImagesPicker.pick(
+      pickType: PickType.all,
+      language: Language.System,
+      maxTime: 30,
+
+      // maxSize: 500,
+      cropOpt: CropOption(
+        // aspectRatio: CropAspectRatio.wh16x9,
+        cropType: CropType.circle,
+      ),
+    );
+    if (res != null) {
+      newPostPath = res[0].thumbPath;
+
+      notifyListeners();
+      // bool status = await ImagesPicker.saveImageToAlbum(File(res[0]?.path));
+      // print(status);
+    }
+  }
+
+  newPostFromCamera() async {
+    List<Media>? res = await ImagesPicker.openCamera(
+      pickType: PickType.image,
+      language: Language.System,
+      maxTime: 30,
+      // maxSize: 500,
+      cropOpt: CropOption(
+        // aspectRatio: CropAspectRatio.wh16x9,
+        cropType: CropType.circle,
+      ),
+    );
+    if (res != null) {
+      newPostPath = res[0].thumbPath;
+
+      notifyListeners();
+      // bool status = await ImagesPicker.saveImageToAlbum(File(res[0]?.path));
+      // print(status);
+    }
+  }
+
+  PostModel? postModel;
+  PublicPosts? publicPosts;
+  TextEditingController description = TextEditingController();
+  uploadNewPost(context) async {
+    var ref = await FirebaseStorage.instance
+        .ref()
+        .child("newPosts/${Uri.file(newPostPath!).pathSegments.last}")
+        .putFile(File(newPostPath!));
+    await ref.ref.getDownloadURL().then((value) {
+      postModel = PostModel(
+          postImage: value,
+          description: description.text == "" ? "" : description.text,
+          dateTime: DateTime.now().toString());
+    });
+    Uuid uuid = const Uuid();
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("myPosts")
+        .doc(uuid.v1())
+        .set(postModel!.toMap())
+        .then((value) {
+      newPostPath = null;
+    });
+    publicPosts = PublicPosts(
+        profileImg: socialUser!.profileImg,
+        userName: socialUser!.name,
+        dateTime: postModel!.dateTime,
+        postImage: postModel!.postImage,
+        description: postModel!.description);
+    await FirebaseFirestore.instance
+        .collection("publicPosts")
+        .doc(uuid.v1())
+        .set(publicPosts!.toMap());
+
+    Navigator.pop(context);
+
+    notifyListeners();
+  }
+
+  String? userSearch = "";
 }
