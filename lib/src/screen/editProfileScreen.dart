@@ -94,30 +94,37 @@ class EditProfile extends StatelessWidget {
                   )
                 ]),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CustomTextField(
-                  hint: "New Name",
-                  prefixIcon: Icons.person,
-                  newController:
-                      Provider.of<MyProvider>(context).nameController,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CustomTextField(
-                  hint: "New Phone Number",
-                  prefixIcon: Icons.phone,
-                  newController:
-                      Provider.of<MyProvider>(context).phoneController,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CustomTextField(
-                  hint: "New Bio",
-                  prefixIcon: Icons.question_mark_outlined,
-                  newController: Provider.of<MyProvider>(context).bioController,
+              Expanded(
+                child: ListView(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CustomTextField(
+                        hint: "New Name",
+                        prefixIcon: Icons.person,
+                        newController:
+                            Provider.of<MyProvider>(context).nameController,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CustomTextField(
+                        hint: "New Phone Number",
+                        prefixIcon: Icons.phone,
+                        newController:
+                            Provider.of<MyProvider>(context).phoneController,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CustomTextField(
+                        hint: "New Bio",
+                        prefixIcon: Icons.question_mark_outlined,
+                        newController:
+                            Provider.of<MyProvider>(context).bioController,
+                      ),
+                    )
+                  ],
                 ),
               )
             ])));
