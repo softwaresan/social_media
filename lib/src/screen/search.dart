@@ -5,10 +5,19 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/model/social_user_model.dart';
+import 'package:social_media/src/screen/chatScreen.dart';
+import 'package:social_media/src/screen/viewProfile.dart';
 
-class Search extends StatelessWidget {
+class Search extends StatefulWidget {
+  @override
+  State<Search> createState() => _SearchState();
+}
+
+class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
+    print("object");
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -19,6 +28,8 @@ class Search extends StatelessWidget {
                 color: Colors.grey[300],
                 child: TextFormField(
                   onChanged: (value) {
+                    setState(() {});
+
                     Provider.of<MyProvider>(context, listen: false).userSearch =
                         value;
                   },
@@ -32,16 +43,22 @@ class Search extends StatelessWidget {
               stream:
                   FirebaseFirestore.instance.collection("users").snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Text("no data");
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
                 } else {
                   List<dynamic> searchList = [];
                   snapshot.data!.docs.forEach((e) {
                     if (e["name"].toLowerCase().contains(
-                            Provider.of<MyProvider>(context)
+                            Provider.of<MyProvider>(context, listen: false)
                                 .userSearch!
                                 .toLowerCase()) &&
-                        Provider.of<MyProvider>(context).userSearch != "") {
+                        Provider.of<MyProvider>(context, listen: false)
+                                .userSearch !=
+                            "" &&
+                        e["name"] !=
+                            Provider.of<MyProvider>(context, listen: false)
+                                .socialUser!
+                                .name) {
                       searchList.add(e);
                     }
                   });
@@ -53,30 +70,44 @@ class Search extends StatelessWidget {
                           ),
                           shrinkWrap: true,
                           itemCount: searchList.length,
-                          itemBuilder: (context, index) => ListTile(
-                            leading: CircleAvatar(
-                              radius: 28,
-                              backgroundImage:
-                                  NetworkImage(searchList[index]["profileImg"]),
+                          itemBuilder: (context, index) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return ViewProfile(
+                                  friendUser: searchList[index],
+                                );
+                              }));
+                            },
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                radius: 28,
+                                backgroundImage: NetworkImage(
+                                    searchList[index]["profileImg"]),
+                              ),
+                              title: Text(searchList[index]["name"]),
                             ),
-                            title: Text(searchList[index]["name"]),
                           ),
                         )
                       : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                           stream: FirebaseFirestore.instance
-                              .collection("publicPosts")
+                              .collectionGroup("myPosts")
                               .snapshots(),
                           builder: (context,
                               AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                                  snapshot) {
-                            if (snapshot.data == null) {
-                              return Center(child: Text("you have no post"));
+                                  snapshot2) {
+                            if (snapshot2.connectionState ==
+                                ConnectionState.waiting) {
+                              return SizedBox(
+                                  height: MediaQuery.of(context).size.height,
+                                  child: Center(
+                                      child: CircularProgressIndicator()));
                             } else {
                               return SizedBox(
                                 child: GridView.builder(
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
-                                    itemCount: snapshot.data!.docs.length,
+                                    itemCount: snapshot2.data!.docs.length,
                                     gridDelegate:
                                         SliverGridDelegateWithFixedCrossAxisCount(
                                             crossAxisCount: 3,
@@ -84,7 +115,7 @@ class Search extends StatelessWidget {
                                             mainAxisSpacing: 5),
                                     itemBuilder: (context, index) {
                                       return Image.network(
-                                        snapshot.data!.docs[index]
+                                        snapshot2.data!.docs[index]
                                             .data()["postImage"],
                                         fit: BoxFit.fill,
                                       );

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:social_media/src/model/messageModel.dart';
 import 'package:social_media/src/model/postModel.dart';
 import 'package:social_media/src/model/publicPostModel.dart';
 import 'package:social_media/src/model/social_user_model.dart';
@@ -17,29 +18,31 @@ import '../screen/home.dart';
 
 class MyProvider with ChangeNotifier {
   int currentIndex = 0;
-  String? profilePicPath;
-  String? coverPicPath;
-  String? postImage;
 
   List<Widget> screens = [Home(), Search(), Profile(), const Setting()];
   void changeScreen(int index) {
+    if (index == 1) {
+      userSearch = "";
+    }
     currentIndex = index;
     notifyListeners();
   }
 
+  String? profilePicPath;
+  String? coverPicPath;
+  String? postImage;
   SocialUser? socialUser;
   String? tempCoverImg;
   String? tempProfileImg;
-  void getUserData() {
+  void getUserData() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final uId = auth.currentUser!.uid;
     final user = FirebaseFirestore.instance.collection("users").doc(uId);
 
-    user.get().then((value) {
+    await user.get().then((value) {
       socialUser = SocialUser.fromMap(value.data()!);
-
-      notifyListeners();
     });
+    notifyListeners();
   }
 
   updateUserProfile(context) async {
@@ -190,7 +193,7 @@ class MyProvider with ChangeNotifier {
   }
 
   PostModel? postModel;
-  PublicPosts? publicPosts;
+  // PublicPosts? publicPosts;
   TextEditingController description = TextEditingController();
   uploadNewPost(context) async {
     var ref = await FirebaseStorage.instance
@@ -213,16 +216,6 @@ class MyProvider with ChangeNotifier {
         .then((value) {
       newPostPath = null;
     });
-    publicPosts = PublicPosts(
-        profileImg: socialUser!.profileImg,
-        userName: socialUser!.name,
-        dateTime: postModel!.dateTime,
-        postImage: postModel!.postImage,
-        description: postModel!.description);
-    await FirebaseFirestore.instance
-        .collection("publicPosts")
-        .doc(uuid.v1())
-        .set(publicPosts!.toMap());
 
     Navigator.pop(context);
 
@@ -230,4 +223,59 @@ class MyProvider with ChangeNotifier {
   }
 
   String? userSearch = "";
+  TextEditingController messageController = TextEditingController();
+  final ScrollController listViewController = ScrollController();
+
+  sendMessages(
+      {required receiverId, required dateTime, required textMsg}) async {
+    MessageModel message = MessageModel(
+        senderId: socialUser!.uid!,
+        receiverId: receiverId,
+        textMsg: textMsg,
+        dateTime: dateTime);
+
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("chats")
+        .doc(receiverId)
+        .collection("messages")
+        .add(message.toMap())
+        .then((value) {
+      notifyListeners();
+    });
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(receiverId)
+        .collection("chats")
+        .doc(socialUser!.uid)
+        .collection("messages")
+        .add(message.toMap())
+        .then((value) {
+      notifyListeners();
+    });
+    messageController.text = "";
+    startFromBottom();
+    notifyListeners();
+  }
+
+  startFromBottom() async {
+    await listViewController.animateTo(
+      listViewController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 1),
+      curve: Curves.ease,
+    );
+  }
+
+  likePost(String postId, String friendId) async {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(friendId)
+        .collection("myPosts")
+        .doc(postId)
+        .collection("likes")
+        .doc(socialUser!.uid)
+        .set({"like": true});
+    notifyListeners();
+  }
 }

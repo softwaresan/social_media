@@ -8,6 +8,7 @@ import 'package:social_media/src/controller/myProvider.dart';
 class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     Provider.of<MyProvider>(context, listen: false).getUserData();
+
     return SafeArea(
       child: Scaffold(
           backgroundColor: Colors.white,
@@ -30,8 +31,11 @@ class HomePage extends StatelessWidget {
                   ))
             ],
           ),
-          body: Provider.of<MyProvider>(context)
-              .screens[Provider.of<MyProvider>(context).currentIndex],
+          body:
+              Provider.of<MyProvider>(context, listen: false).socialUser != null
+                  ? Provider.of<MyProvider>(context)
+                      .screens[Provider.of<MyProvider>(context).currentIndex]
+                  : CircularProgressIndicator(),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: Provider.of<MyProvider>(context).currentIndex,
             type: BottomNavigationBarType.fixed,
