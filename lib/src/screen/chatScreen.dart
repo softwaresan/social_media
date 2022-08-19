@@ -43,34 +43,29 @@ class ChatScreen extends StatelessWidget {
                     child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                         stream: FirebaseFirestore.instance
                             .collection("users")
-                            .doc(Provider.of<MyProvider>(context)
+                            .doc(Provider.of<MyProvider>(context, listen: false)
                                 .socialUser!
                                 .uid)
                             .collection("chats")
                             .doc(friendUser["uid"])
                             .collection("messages")
-                            .orderBy("dateTime")
+                            .orderBy("dateTime", descending: true)
                             .snapshots(),
                         builder: (context, snapshot) {
-                          if (snapshot.data == null) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return Text("no messages");
                           } else {
-                            if (Provider.of<MyProvider>(context)
-                                .listViewController
-                                .hasClients) {
-                              Provider.of<MyProvider>(context)
-                                  .startFromBottom();
-                            }
                             return Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                               child: ListView.builder(
-                                controller: Provider.of<MyProvider>(context)
-                                    .listViewController,
+                                reverse: true,
                                 itemCount: snapshot.data!.docs.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return snapshot.data!.docs[index]
                                               .data()["senderId"] !=
-                                          Provider.of<MyProvider>(context)
+                                          Provider.of<MyProvider>(context,
+                                                  listen: false)
                                               .socialUser!
                                               .uid
                                       ? Align(
@@ -147,41 +142,50 @@ class ChatScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                   child: Container(
                     height: MediaQuery.of(context).size.height * 0.05,
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: TextFormField(
-                          controller: Provider.of<MyProvider>(context)
+                    child: TextFormField(
+                      onFieldSubmitted: (value) {
+                        if (Provider.of<MyProvider>(context, listen: false)
+                                .messageController
+                                .text
+                                .trim() !=
+                            "")
+                          Provider.of<MyProvider>(context, listen: false)
+                              .sendMessages(
+                                  receiverId: friendUser["uid"],
+                                  dateTime: DateTime.now().toString(),
+                                  textMsg: Provider.of<MyProvider>(context,
+                                          listen: false)
+                                      .messageController
+                                      .text);
+                      },
+                      controller:
+                          Provider.of<MyProvider>(context, listen: false)
                               .messageController,
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(15)),
-                              suffixIcon: IconButton(
-                                  onPressed: () {
-                                    if (Provider.of<MyProvider>(context,
-                                                listen: false)
-                                            .messageController
-                                            .text
-                                            .trim() !=
-                                        "")
-                                      Provider.of<MyProvider>(context,
-                                              listen: false)
-                                          .sendMessages(
-                                              receiverId: friendUser["uid"],
-                                              dateTime:
-                                                  DateTime.now().toString(),
-                                              textMsg: Provider.of<MyProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .messageController
-                                                  .text);
-                                  },
-                                  icon: Icon(Icons.send)),
-                              label: Text("MESSAGE"),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never),
-                        )),
-                      ],
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                if (Provider.of<MyProvider>(context,
+                                            listen: false)
+                                        .messageController
+                                        .text
+                                        .trim() !=
+                                    "")
+                                  Provider.of<MyProvider>(context,
+                                          listen: false)
+                                      .sendMessages(
+                                          receiverId: friendUser["uid"],
+                                          dateTime: DateTime.now().toString(),
+                                          textMsg: Provider.of<MyProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .messageController
+                                              .text);
+                              },
+                              icon: Icon(Icons.send)),
+                          label: Text("MESSAGE"),
+                          floatingLabelBehavior: FloatingLabelBehavior.never),
                     ),
                   ),
                 )

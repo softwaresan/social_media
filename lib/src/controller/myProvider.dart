@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:social_media/src/model/messageModel.dart';
 import 'package:social_media/src/model/postModel.dart';
 import 'package:social_media/src/model/publicPostModel.dart';
@@ -224,7 +225,6 @@ class MyProvider with ChangeNotifier {
 
   String? userSearch = "";
   TextEditingController messageController = TextEditingController();
-  final ScrollController listViewController = ScrollController();
 
   sendMessages(
       {required receiverId, required dateTime, required textMsg}) async {
@@ -241,9 +241,7 @@ class MyProvider with ChangeNotifier {
         .doc(receiverId)
         .collection("messages")
         .add(message.toMap())
-        .then((value) {
-      notifyListeners();
-    });
+        .then((value) {});
     await FirebaseFirestore.instance
         .collection("users")
         .doc(receiverId)
@@ -251,20 +249,9 @@ class MyProvider with ChangeNotifier {
         .doc(socialUser!.uid)
         .collection("messages")
         .add(message.toMap())
-        .then((value) {
-      notifyListeners();
-    });
+        .then((value) {});
     messageController.text = "";
-    startFromBottom();
     notifyListeners();
-  }
-
-  startFromBottom() async {
-    await listViewController.animateTo(
-      listViewController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 1),
-      curve: Curves.ease,
-    );
   }
 
   likePost(String postId, String friendId) async {
@@ -278,4 +265,54 @@ class MyProvider with ChangeNotifier {
         .set({"like": true});
     notifyListeners();
   }
+
+  TextEditingController commentController = TextEditingController();
+
+  //myPosts  => doc(postId) => Comments => doc(socialUser.id)
+
+  commentPost(String postId, String friendId) async {
+    if (commentController.text.trim() != "") {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(friendId)
+          .collection("myPosts")
+          .doc(postId)
+          .collection("comments")
+          .doc(socialUser!.uid)
+          .set({
+        "comment": commentController.text.trim(),
+        "dateTime": DateFormat.yMd().add_jm().format(DateTime.now())
+      });
+      commentController.text = "";
+      notifyListeners();
+    }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+//ToDo
+//followers and following 
+//like bug
+//repair the circular progress
+////add video screen
+//add notification 
+//users be able to send photos
+
+
+
+
+////after bootcamp try to clean the code
+
+
+

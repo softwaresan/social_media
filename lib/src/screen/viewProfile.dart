@@ -22,6 +22,9 @@ class ViewProfile extends StatelessWidget {
         actions: [
           IconButton(
               onPressed: () {
+                Provider.of<MyProvider>(context, listen: false)
+                    .messageController
+                    .text = "";
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return ChatScreen(friendUser: friendUser);
                 }));

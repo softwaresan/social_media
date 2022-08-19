@@ -102,6 +102,8 @@ class _SearchState extends State<Search> {
                                   height: MediaQuery.of(context).size.height,
                                   child: Center(
                                       child: CircularProgressIndicator()));
+                            } else if (snapshot.data == null) {
+                              return Text("no data");
                             } else {
                               return SizedBox(
                                 child: GridView.builder(
