@@ -17,18 +17,23 @@ class Viewpost extends StatelessWidget {
       required this.profileImg,
       required this.name,
       required this.description,
-      required this.postImg});
+      required this.postImg,
+      required this.isLiked,
+      required this.commentsNo});
   String postId;
   String userId;
   String profileImg;
   String dateTime;
-  String numberOfLikes;
+  int numberOfLikes;
   String name;
   String description;
   String postImg;
+  bool isLiked;
+  int commentsNo;
 
   @override
   Widget build(BuildContext context) {
+    print("$numberOfLikes elel");
     return SafeArea(
         child: Scaffold(
       backgroundColor: Colors.white,
@@ -120,13 +125,19 @@ class Viewpost extends StatelessWidget {
                                 padding: const EdgeInsets.all(5.0),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.favorite_outline),
-                                    Text(numberOfLikes),
+                                    isLiked
+                                        ? Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                          )
+                                        : Icon(Icons.favorite_outline),
+                                    Text(numberOfLikes.toString()),
                                     Spacer(),
                                     Row(
                                       children: [
                                         Icon(Icons.add_comment_outlined),
-                                        Text("100"),
+                                        Text(snapshot.data!.docs.length
+                                            .toString()),
                                       ],
                                     )
                                   ],
@@ -183,11 +194,30 @@ class Viewpost extends StatelessWidget {
                                       onTap: () {
                                         Provider.of<MyProvider>(context,
                                                 listen: false)
-                                            .likePost(postId, userId);
+                                            .getPosts();
+                                        Provider.of<MyProvider>(context,
+                                                listen: false)
+                                            .likePost(postId, userId, isLiked);
+
+                                        if (isLiked) {
+                                          isLiked = !isLiked;
+                                          numberOfLikes--;
+                                          print("$numberOfLikes elte5");
+                                        } else {
+                                          isLiked = !isLiked;
+                                          numberOfLikes++;
+                                          print("$numberOfLikes elte5");
+                                        }
                                       },
                                       child: Row(
                                         children: [
-                                          Icon(Icons.favorite_border_outlined),
+                                          isLiked
+                                              ? Icon(
+                                                  Icons.favorite,
+                                                  color: Colors.red,
+                                                )
+                                              : Icon(Icons
+                                                  .favorite_border_outlined),
                                           Text("Like"),
                                         ],
                                       ),

@@ -5,21 +5,29 @@ class PostModel {
   String postImage;
   String description;
   String dateTime;
+  String uId;
+  String postId;
   PostModel({
     required this.postImage,
     required this.description,
     required this.dateTime,
+    required this.uId,
+    required this.postId,
   });
 
   PostModel copyWith({
     String? postImage,
     String? description,
     String? dateTime,
+    String? uId,
+    String? postId,
   }) {
     return PostModel(
       postImage: postImage ?? this.postImage,
       description: description ?? this.description,
       dateTime: dateTime ?? this.dateTime,
+      uId: uId ?? this.uId,
+      postId: postId ?? this.postId,
     );
   }
 
@@ -28,6 +36,8 @@ class PostModel {
       'postImage': postImage,
       'description': description,
       'dateTime': dateTime,
+      'uId': uId,
+      'postId': postId,
     };
   }
 
@@ -36,6 +46,8 @@ class PostModel {
       postImage: map['postImage'] as String,
       description: map['description'] as String,
       dateTime: map['dateTime'] as String,
+      uId: map['uId'] as String,
+      postId: map['postId'] as String,
     );
   }
 
@@ -45,8 +57,9 @@ class PostModel {
       PostModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() =>
-      'PostModel(postImage: $postImage, description: $description, dateTime: $dateTime)';
+  String toString() {
+    return 'PostModel(postImage: $postImage, description: $description, dateTime: $dateTime, uId: $uId, postId: $postId)';
+  }
 
   @override
   bool operator ==(covariant PostModel other) {
@@ -54,10 +67,17 @@ class PostModel {
 
     return other.postImage == postImage &&
         other.description == description &&
-        other.dateTime == dateTime;
+        other.dateTime == dateTime &&
+        other.uId == uId &&
+        other.postId == postId;
   }
 
   @override
-  int get hashCode =>
-      postImage.hashCode ^ description.hashCode ^ dateTime.hashCode;
+  int get hashCode {
+    return postImage.hashCode ^
+        description.hashCode ^
+        dateTime.hashCode ^
+        uId.hashCode ^
+        postId.hashCode;
+  }
 }

@@ -4,55 +4,74 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/screen/myChats.dart';
+import 'package:social_media/src/screen/testFile.dart';
 
 class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
-    Provider.of<MyProvider>(context, listen: false).getUserData();
+    print("isloading");
 
-    return SafeArea(
-      child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: Text("Home", style: Theme.of(context).textTheme.subtitle1),
-            actions: [
-              IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.chat_outlined,
-                    color: Colors.black,
-                  )),
-              IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.add_a_photo_outlined,
-                    color: Colors.black,
-                  ))
-            ],
-          ),
-          body:
-              Provider.of<MyProvider>(context, listen: false).socialUser != null
-                  ? Provider.of<MyProvider>(context)
-                      .screens[Provider.of<MyProvider>(context).currentIndex]
-                  : CircularProgressIndicator(),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: Provider.of<MyProvider>(context).currentIndex,
-            type: BottomNavigationBarType.fixed,
-            onTap: (index) {
-              Provider.of<MyProvider>(context, listen: false)
-                  .changeScreen(index);
-            },
-            items: [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.search), label: "Search"),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.person), label: "Profile"),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.settings), label: "settings")
-            ],
-          )),
-    );
+    if (Provider.of<MyProvider>(context).isLoading) {
+      Provider.of<MyProvider>(context, listen: false).getUserData();
+
+      return CircularProgressIndicator();
+    } else {
+      print("render");
+      return SafeArea(
+        child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: Text("Home", style: Theme.of(context).textTheme.subtitle1),
+              actions: [
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return MyChats();
+                      }));
+                    },
+                    icon: Icon(
+                      Icons.chat_outlined,
+                      color: Colors.black,
+                    )),
+                IconButton(
+                    onPressed: () {
+                      Provider.of<MyProvider>(context, listen: false)
+                          .getAllChatsWithFriends();
+                    },
+                    icon: Icon(
+                      Icons.add_a_photo_outlined,
+                      color: Colors.black,
+                    ))
+              ],
+            ),
+            body: Provider.of<MyProvider>(context, listen: false).socialUser !=
+                    null
+                ? Provider.of<MyProvider>(context)
+                    .screens[Provider.of<MyProvider>(context).currentIndex]
+                : CircularProgressIndicator(),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: Provider.of<MyProvider>(context).currentIndex,
+              type: BottomNavigationBarType.fixed,
+              onTap: (index) {
+                Provider.of<MyProvider>(context, listen: false)
+                    .changeScreen(index);
+              },
+              items: [
+                BottomNavigationBarItem(
+                    icon: GestureDetector(child: Icon(Icons.home)),
+                    label: "Home"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.search), label: "Search"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.person), label: "Profile"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.settings), label: "settings")
+              ],
+            )),
+      );
+    }
   }
 }

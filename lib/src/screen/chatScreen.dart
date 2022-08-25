@@ -9,7 +9,7 @@ import 'package:social_media/src/controller/myProvider.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatScreen({required this.friendUser});
-  QueryDocumentSnapshot<Map<String, dynamic>> friendUser;
+  var friendUser;
 
   @override
   Widget build(BuildContext context) {

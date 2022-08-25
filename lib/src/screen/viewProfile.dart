@@ -10,9 +10,25 @@ import 'package:social_media/src/screen/addNewPost.dart';
 import 'package:social_media/src/screen/chatScreen.dart';
 import 'package:social_media/src/screen/editProfileScreen.dart';
 
-class ViewProfile extends StatelessWidget {
-  ViewProfile({Key? key, required this.friendUser}) : super(key: key);
-  QueryDocumentSnapshot<Map<String, dynamic>> friendUser;
+class ViewProfile extends StatefulWidget {
+  ViewProfile({Key? key, this.friendUser, required this.isFollowed})
+      : super(key: key);
+  var friendUser;
+
+  bool isFollowed;
+  @override
+  State<ViewProfile> createState() => _ViewProfileState();
+}
+
+class _ViewProfileState extends State<ViewProfile> {
+  String? followState;
+
+  @override
+  void initState() {
+    print("hello");
+    followState = widget.isFollowed ? "unFollow" : "Follow";
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +42,7 @@ class ViewProfile extends StatelessWidget {
                     .messageController
                     .text = "";
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return ChatScreen(friendUser: friendUser);
+                  return ChatScreen(friendUser: widget.friendUser!);
                 }));
               },
               icon: Icon(
@@ -36,7 +52,7 @@ class ViewProfile extends StatelessWidget {
         ],
         centerTitle: true,
         title: Text(
-          friendUser["name"],
+          widget.friendUser!["name"],
           style: Theme.of(context).textTheme.subtitle1,
         ),
         leading: IconButton(
@@ -61,7 +77,7 @@ class ViewProfile extends StatelessWidget {
                   height: 200,
                   width: double.infinity,
                   child: Image.network(
-                    friendUser["coverImg"],
+                    widget.friendUser!["coverImg"],
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -72,15 +88,17 @@ class ViewProfile extends StatelessWidget {
                       backgroundColor: Colors.white,
                       child: CircleAvatar(
                         radius: 60,
-                        backgroundImage: NetworkImage(friendUser["profileImg"]),
+                        backgroundImage:
+                            NetworkImage(widget.friendUser!["profileImg"]),
                       )),
                 )
               ]),
           SizedBox(height: 50),
-          Text(friendUser["name"],
+          Text(widget.friendUser!["name"],
               style: Theme.of(context).textTheme.subtitle1),
           SizedBox(height: 5),
-          Text(friendUser["bio"], style: Theme.of(context).textTheme.caption),
+          Text(widget.friendUser!["bio"],
+              style: Theme.of(context).textTheme.caption),
           SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -90,8 +108,27 @@ class ViewProfile extends StatelessWidget {
               Text("Followings", style: Theme.of(context).textTheme.subtitle1),
             ],
           ),
+          SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                  onPressed: () async {
+                    Provider.of<MyProvider>(context, listen: false).followUser(
+                        widget.friendUser!["uid"],
+                        widget.friendUser!["name"],
+                        widget.isFollowed);
+
+                    if (widget.isFollowed) {
+                      followState = "Follow";
+                      widget.isFollowed = !widget.isFollowed;
+                    } else {
+                      followState = "unFollow";
+                      widget.isFollowed = !widget.isFollowed;
+                    }
+                    setState(() {});
+                  },
+                  child: Text("$followState"))),
           Padding(
-            padding: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(top: 0),
             child: Container(
               color: Colors.grey[300],
               height: 1,
@@ -100,7 +137,7 @@ class ViewProfile extends StatelessWidget {
           StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection("users")
-                  .doc(friendUser["uid"])
+                  .doc(widget.friendUser!["uid"])
                   .collection("myPosts")
                   .orderBy("dateTime", descending: true)
                   .snapshots(),

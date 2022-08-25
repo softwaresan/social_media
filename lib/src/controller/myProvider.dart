@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,18 +36,22 @@ class MyProvider with ChangeNotifier {
   SocialUser? socialUser;
   String? tempCoverImg;
   String? tempProfileImg;
-  void getUserData() async {
+  bool isLoading = true;
+  Future<void> getUserData() async {
+    isLoading = true;
     final FirebaseAuth auth = FirebaseAuth.instance;
     final uId = auth.currentUser!.uid;
     final user = FirebaseFirestore.instance.collection("users").doc(uId);
 
     await user.get().then((value) {
       socialUser = SocialUser.fromMap(value.data()!);
+      isLoading = false;
+      notifyListeners();
     });
-    notifyListeners();
   }
 
   updateUserProfile(context) async {
+    isLoading = true;
     if (coverPicPath != null) {
       await uploadCoverPic().then((value) => tempCoverImg = value);
     }
@@ -72,6 +77,8 @@ class MyProvider with ChangeNotifier {
     nameController.text = "";
     phoneController.text = "";
     bioController.text = "";
+    isLoading = false;
+    notifyListeners();
   }
 
   Future<String> uploadCoverPic() async {
@@ -148,6 +155,15 @@ class MyProvider with ChangeNotifier {
   }
 
   userSignOut() async {
+    isPosts = true;
+    isLoading = true;
+    posts = [];
+    followings = [];
+    users = [];
+    isLiked = [];
+    likes = [];
+    comments = [];
+
     await FirebaseAuth.instance.signOut();
   }
 
@@ -197,6 +213,8 @@ class MyProvider with ChangeNotifier {
   // PublicPosts? publicPosts;
   TextEditingController description = TextEditingController();
   uploadNewPost(context) async {
+    Uuid uuid = const Uuid();
+
     var ref = await FirebaseStorage.instance
         .ref()
         .child("newPosts/${Uri.file(newPostPath!).pathSegments.last}")
@@ -205,14 +223,15 @@ class MyProvider with ChangeNotifier {
       postModel = PostModel(
           postImage: value,
           description: description.text == "" ? "" : description.text,
-          dateTime: DateTime.now().toString());
+          dateTime: DateTime.now().toString(),
+          uId: socialUser!.uid!,
+          postId: uuid.v1());
     });
-    Uuid uuid = const Uuid();
     await FirebaseFirestore.instance
         .collection("users")
         .doc(socialUser!.uid)
         .collection("myPosts")
-        .doc(uuid.v1())
+        .doc(postModel!.postId)
         .set(postModel!.toMap())
         .then((value) {
       newPostPath = null;
@@ -240,7 +259,8 @@ class MyProvider with ChangeNotifier {
         .collection("chats")
         .doc(receiverId)
         .collection("messages")
-        .add(message.toMap())
+        .doc()
+        .set(message.toMap())
         .then((value) {});
     await FirebaseFirestore.instance
         .collection("users")
@@ -248,21 +268,33 @@ class MyProvider with ChangeNotifier {
         .collection("chats")
         .doc(socialUser!.uid)
         .collection("messages")
-        .add(message.toMap())
+        .doc()
+        .set(message.toMap())
         .then((value) {});
     messageController.text = "";
     notifyListeners();
   }
 
-  likePost(String postId, String friendId) async {
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(friendId)
-        .collection("myPosts")
-        .doc(postId)
-        .collection("likes")
-        .doc(socialUser!.uid)
-        .set({"like": true});
+  likePost(String postId, String friendId, bool like) async {
+    if (like) {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(friendId)
+          .collection("myPosts")
+          .doc(postId)
+          .collection("likes")
+          .doc(socialUser!.uid)
+          .delete();
+    } else {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(friendId)
+          .collection("myPosts")
+          .doc(postId)
+          .collection("likes")
+          .doc(socialUser!.uid)
+          .set({"like": true});
+    }
     notifyListeners();
   }
 
@@ -287,32 +319,123 @@ class MyProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  followUser(String friendId, String friendName, bool isFollowed) async {
+    var friendRef = FirebaseFirestore.instance
+        .collection("users")
+        .doc(friendId)
+        .collection("followers")
+        .doc(socialUser!.uid);
+    var myRef = FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("followings")
+        .doc(friendId);
+
+    if (isFollowed) {
+      await myRef.delete();
+      await friendRef.delete();
+    } else {
+      await myRef.set({"name": friendName, "uId": friendId});
+
+      await friendRef.set({"name": socialUser!.name, "uId": socialUser!.uid});
+    }
+    notifyListeners();
+  }
+
+  List followings = [];
+  List posts = [];
+  List users = [];
+  List likes = [];
+  List isLiked = [];
+  List comments = [];
+
+  bool isPosts = true;
+  Future<void> getPosts() async {
+    print("wer");
+
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("followings")
+        .get()
+        .then((event) async {
+      followings = event.docs.map((e) => e).toList();
+      users = [];
+      posts = [];
+      likes = [];
+      isLiked = [];
+      comments = [];
+
+      for (var element in followings) {
+        //element= each following user with property
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(element["uId"])
+            .collection("myPosts")
+            .orderBy("dateTime", descending: true)
+            .get()
+            .then((event) async {
+          for (var element in event.docs) {
+            //element = each post with property
+            posts.add(element);
+            await FirebaseFirestore.instance
+                .collection("users")
+                .doc(element["uId"])
+                .get()
+                .then((value) {
+              users.add(value);
+            });
+          }
+
+          for (var element in event.docs) {
+            var likesRef = FirebaseFirestore.instance
+                .collection("users")
+                .doc(element["uId"])
+                .collection("myPosts")
+                .doc(element["postId"])
+                .collection("likes");
+
+            await likesRef.get().then((value) {
+              likes.add(value.docs.length);
+            });
+            var isExist = await likesRef.doc(socialUser!.uid).get();
+            isLiked.add(isExist.exists);
+          }
+          for (var element in event.docs) {
+            var commentRef = FirebaseFirestore.instance
+                .collection("users")
+                .doc(element["uId"])
+                .collection("myPosts")
+                .doc(element["postId"])
+                .collection("comments");
+
+            await commentRef.get().then((value) {
+              comments.add(value.docs.length);
+            });
+          }
+        });
+      }
+    });
+
+    isPosts = false;
+    notifyListeners();
+  }
+
+  List allChats = [];
+  getAllChatsWithFriends() async {
+    var chatRef = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("chats");
+  }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-//ToDo
-//followers and following 
-//like bug
-//repair the circular progress
-////add video screen
-//add notification 
-//users be able to send photos
-
-
-
-
-////after bootcamp try to clean the code
-
-
+//fake comment +1
+//action button chat
+//videos 
+//delete posts and comments
+//notifications
+//error handling
+//design
 

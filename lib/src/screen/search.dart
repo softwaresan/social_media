@@ -17,7 +17,6 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
-    print("object");
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +45,8 @@ class _SearchState extends State<Search> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else {
-                  List<dynamic> searchList = [];
+                  List<QueryDocumentSnapshot<Map<String, dynamic>>> searchList =
+                      [];
                   snapshot.data!.docs.forEach((e) {
                     if (e["name"].toLowerCase().contains(
                             Provider.of<MyProvider>(context, listen: false)
@@ -71,11 +71,20 @@ class _SearchState extends State<Search> {
                           shrinkWrap: true,
                           itemCount: searchList.length,
                           itemBuilder: (context, index) => GestureDetector(
-                            onTap: () {
+                            onTap: () async {
+                              var isFollowed = await searchList[index]
+                                  .reference
+                                  .collection("followers")
+                                  .doc(Provider.of<MyProvider>(context,
+                                          listen: false)
+                                      .socialUser!
+                                      .uid)
+                                  .get();
                               Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return ViewProfile(
                                   friendUser: searchList[index],
+                                  isFollowed: isFollowed.exists,
                                 );
                               }));
                             },
