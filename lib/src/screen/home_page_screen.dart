@@ -27,6 +27,8 @@ class HomePage extends StatelessWidget {
               actions: [
                 IconButton(
                     onPressed: () {
+                      Provider.of<MyProvider>(context, listen: false).isChat =
+                          true;
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
                         return MyChats();
@@ -37,10 +39,7 @@ class HomePage extends StatelessWidget {
                       color: Colors.black,
                     )),
                 IconButton(
-                    onPressed: () {
-                      Provider.of<MyProvider>(context, listen: false)
-                          .getAllChatsWithFriends();
-                    },
+                    onPressed: () {},
                     icon: Icon(
                       Icons.add_a_photo_outlined,
                       color: Colors.black,

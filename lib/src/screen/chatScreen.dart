@@ -4,12 +4,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 
 class ChatScreen extends StatelessWidget {
-  ChatScreen({required this.friendUser});
+  ChatScreen({required this.friendUser, this.lastMsgUserIndex});
   var friendUser;
+  int? lastMsgUserIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +158,8 @@ class ChatScreen extends StatelessWidget {
                                   textMsg: Provider.of<MyProvider>(context,
                                           listen: false)
                                       .messageController
-                                      .text);
+                                      .text,
+                                  lastMsgUserIndex: lastMsgUserIndex);
                       },
                       controller:
                           Provider.of<MyProvider>(context, listen: false)
@@ -181,7 +184,8 @@ class ChatScreen extends StatelessWidget {
                                                   context,
                                                   listen: false)
                                               .messageController
-                                              .text);
+                                              .text,
+                                          lastMsgUserIndex: lastMsgUserIndex);
                               },
                               icon: Icon(Icons.send)),
                           label: Text("MESSAGE"),

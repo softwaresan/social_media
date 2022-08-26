@@ -3,8 +3,10 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:social_media/src/model/messageModel.dart';
 import 'package:social_media/src/model/postModel.dart';
@@ -163,6 +165,10 @@ class MyProvider with ChangeNotifier {
     isLiked = [];
     likes = [];
     comments = [];
+    chats = [];
+    allChats = [];
+    recentlyChatsUser = [];
+    lastMsgWithFriend = [];
 
     await FirebaseAuth.instance.signOut();
   }
@@ -246,32 +252,41 @@ class MyProvider with ChangeNotifier {
   TextEditingController messageController = TextEditingController();
 
   sendMessages(
-      {required receiverId, required dateTime, required textMsg}) async {
+      {required receiverId,
+      required dateTime,
+      required textMsg,
+      lastMsgUserIndex}) async {
+    messageController.text = "";
+
     MessageModel message = MessageModel(
         senderId: socialUser!.uid!,
         receiverId: receiverId,
         textMsg: textMsg,
         dateTime: dateTime);
 
-    await FirebaseFirestore.instance
+    var myRef = FirebaseFirestore.instance
         .collection("users")
         .doc(socialUser!.uid)
         .collection("chats")
-        .doc(receiverId)
-        .collection("messages")
-        .doc()
-        .set(message.toMap())
-        .then((value) {});
-    await FirebaseFirestore.instance
+        .doc(receiverId);
+
+    await myRef.set({"uId": receiverId});
+
+    await myRef.collection("messages").add(message.toMap()).then((value) {});
+    var friendRef = FirebaseFirestore.instance
         .collection("users")
         .doc(receiverId)
         .collection("chats")
-        .doc(socialUser!.uid)
+        .doc(socialUser!.uid);
+    await friendRef.set({"uId": socialUser!.uid});
+
+    await friendRef
         .collection("messages")
-        .doc()
-        .set(message.toMap())
+        .add(message.toMap())
         .then((value) {});
-    messageController.text = "";
+    if (lastMsgUserIndex != null) {
+      chats[lastMsgUserIndex]["lastMsg"] = textMsg;
+    }
     notifyListeners();
   }
 
@@ -422,20 +437,91 @@ class MyProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  List chats = [];
   List allChats = [];
-  getAllChatsWithFriends() async {
-    var chatRef = await FirebaseFirestore.instance
+  List recentlyChatsUser = [];
+  List lastMsgWithFriend = [];
+  bool isChat = true;
+  Future<void> getAllChatsWithFriends() async {
+    var chatRef = FirebaseFirestore.instance
         .collection("users")
         .doc(socialUser!.uid)
         .collection("chats");
+
+    await chatRef.get().then((value) async {
+      allChats = [];
+      recentlyChatsUser = [];
+      lastMsgWithFriend = [];
+
+      chats = [];
+      for (var element in value.docs) {
+        await chatRef
+            .doc(element.id)
+            .collection("messages")
+            .orderBy("dateTime")
+            .get()
+            .then((value) {
+          lastMsgWithFriend.add(value.docs.last);
+        });
+        allChats.add(element);
+      }
+
+      for (var element in allChats) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(element.id)
+            .get()
+            .then((value) {
+          recentlyChatsUser.add(value);
+        });
+      }
+    });
+    for (int i = 0; i < recentlyChatsUser.length; i++) {
+      chats.add({
+        "user": recentlyChatsUser[i],
+        "lastMsg": lastMsgWithFriend[i]["textMsg"],
+        "lastDateTime": lastMsgWithFriend[i]["dateTime"]
+      });
+    }
+
+    isChat = false;
+    notifyListeners();
+  }
+
+  Future<void> deleteChat(String friendId) async {
+    final instance = FirebaseFirestore.instance;
+    final batch = instance.batch();
+    var collection = instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("chats")
+        .doc(friendId)
+        .collection("messages");
+    var snapshots = await collection.get();
+    for (var doc in snapshots.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("chats")
+        .doc(friendId)
+        .delete();
+    isChats();
+  }
+
+  isChats() {
+    isChat = true;
+    notifyListeners();
   }
 }
 
 //fake comment +1
-//action button chat
-//videos 
+//action button chat/on process
+//videos
 //delete posts and comments
 //notifications
-//error handling
+//error handling/search for chats has a bug
 //design
 

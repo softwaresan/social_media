@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/screen/ViewPost.dart';
@@ -58,9 +59,10 @@ class _HomeState extends State<Home> {
                           title: Text(Provider.of<MyProvider>(context)
                               .users[index]
                               .data()["name"]),
-                          subtitle: Text(Provider.of<MyProvider>(context)
-                              .posts[index]
-                              .data()["dateTime"]),
+                          subtitle: Text(DateFormat.yMd().add_jm().format(
+                              DateTime.parse(Provider.of<MyProvider>(context)
+                                  .posts[index]
+                                  .data()["dateTime"]))),
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(
                                 Provider.of<MyProvider>(context)
@@ -153,16 +155,20 @@ class _HomeState extends State<Home> {
                                           color: Colors.red,
                                         )
                                       : Icon(Icons.favorite_outline)),
-                                  Text(Provider.of<MyProvider>(context)
-                                      .likes[index]
-                                      .toString()),
+                                  Text(" " +
+                                      Provider.of<MyProvider>(context)
+                                          .likes[index]
+                                          .toString() +
+                                      " Likes"),
                                   Spacer(),
                                   Row(
                                     children: [
                                       Icon(Icons.add_comment_outlined),
-                                      Text(Provider.of<MyProvider>(context)
-                                          .comments[index]
-                                          .toString()),
+                                      Text(" " +
+                                          Provider.of<MyProvider>(context)
+                                              .comments[index]
+                                              .toString() +
+                                          " Comments"),
                                     ],
                                   )
                                 ],
