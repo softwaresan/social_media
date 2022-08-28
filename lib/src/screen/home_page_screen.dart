@@ -6,24 +6,40 @@ import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/screen/myChats.dart';
 import 'package:social_media/src/screen/testFile.dart';
+import 'package:social_media/src/screen/videoShowScreen.dart';
 
 class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
-    print("isloading");
+    Color tempColor = Provider.of<MyProvider>(context).currentIndex == 2
+        ? Colors.white
+        : Colors.black;
 
     if (Provider.of<MyProvider>(context).isLoading) {
       Provider.of<MyProvider>(context, listen: false).getUserData();
 
       return CircularProgressIndicator();
     } else {
-      print("render");
       return SafeArea(
         child: Scaffold(
-            backgroundColor: Colors.white,
+            extendBodyBehindAppBar:
+                Provider.of<MyProvider>(context).currentIndex == 2
+                    ? true
+                    : false,
+            extendBody: Provider.of<MyProvider>(context).currentIndex == 2
+                ? true
+                : false,
+            backgroundColor: Provider.of<MyProvider>(context).currentIndex == 2
+                ? Colors.transparent
+                : Colors.white,
             appBar: AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor:
+                  Provider.of<MyProvider>(context).currentIndex == 2
+                      ? Colors.transparent
+                      : Colors.white,
               elevation: 0,
-              title: Text("Home", style: Theme.of(context).textTheme.subtitle1),
+              title: Provider.of<MyProvider>(context).currentIndex == 2
+                  ? Text("Home", style: TextStyle(color: Colors.white))
+                  : Text("Home", style: Theme.of(context).textTheme.subtitle1),
               actions: [
                 IconButton(
                     onPressed: () {
@@ -36,13 +52,13 @@ class HomePage extends StatelessWidget {
                     },
                     icon: Icon(
                       Icons.chat_outlined,
-                      color: Colors.black,
+                      color: tempColor,
                     )),
                 IconButton(
                     onPressed: () {},
                     icon: Icon(
                       Icons.add_a_photo_outlined,
-                      color: Colors.black,
+                      color: tempColor,
                     ))
               ],
             ),
@@ -52,6 +68,12 @@ class HomePage extends StatelessWidget {
                     .screens[Provider.of<MyProvider>(context).currentIndex]
                 : CircularProgressIndicator(),
             bottomNavigationBar: BottomNavigationBar(
+              backgroundColor:
+                  Provider.of<MyProvider>(context).currentIndex == 2
+                      ? Colors.transparent
+                      : Colors.white,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
               currentIndex: Provider.of<MyProvider>(context).currentIndex,
               type: BottomNavigationBarType.fixed,
               onTap: (index) {
@@ -60,14 +82,37 @@ class HomePage extends StatelessWidget {
               },
               items: [
                 BottomNavigationBarItem(
-                    icon: GestureDetector(child: Icon(Icons.home)),
+                    icon: GestureDetector(
+                        child: Icon(
+                      Icons.home,
+                      color: tempColor,
+                    )),
                     label: "Home"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.search), label: "Search"),
+                    icon: Icon(
+                      Icons.search,
+                      color: tempColor,
+                    ),
+                    label: "Search"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.person), label: "Profile"),
+                    icon: Icon(
+                      Icons.ondemand_video_sharp,
+                      size: 35,
+                      color: tempColor,
+                    ),
+                    label: "Reel"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.settings), label: "settings")
+                    icon: Icon(
+                      Icons.account_circle,
+                      color: tempColor,
+                    ),
+                    label: "Profile"),
+                BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.settings,
+                      color: tempColor,
+                    ),
+                    label: "settings")
               ],
             )),
       );

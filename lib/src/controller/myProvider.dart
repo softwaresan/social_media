@@ -16,18 +16,27 @@ import 'package:social_media/src/screen/profile.dart';
 import 'package:social_media/src/screen/search.dart';
 import 'package:social_media/src/screen/settings.dart';
 import 'package:images_picker/images_picker.dart';
+import 'package:social_media/src/screen/videoShowScreen.dart';
 import 'package:uuid/uuid.dart';
+import 'package:video_player/video_player.dart';
 
 import '../screen/home.dart';
 
 class MyProvider with ChangeNotifier {
   int currentIndex = 0;
 
-  List<Widget> screens = [Home(), Search(), Profile(), const Setting()];
+  List<Widget> screens = [
+    Home(),
+    Search(),
+    Videos(),
+    Profile(),
+    const Setting()
+  ];
   void changeScreen(int index) {
     if (index == 1) {
       userSearch = "";
     }
+
     currentIndex = index;
     notifyListeners();
   }
@@ -515,6 +524,12 @@ class MyProvider with ChangeNotifier {
     isChat = true;
     notifyListeners();
   }
+
+  List<String> videoController = [
+    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
+  ];
 }
 
 //fake comment +1
