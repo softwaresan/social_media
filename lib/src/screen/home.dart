@@ -242,7 +242,8 @@ class _HomeState extends State<Home> {
                                             .data()["uId"],
                                         Provider.of<MyProvider>(context,
                                                 listen: false)
-                                            .isLiked[index]);
+                                            .isLiked[index],
+                                        "myPosts");
 
                                 if (Provider.of<MyProvider>(context,
                                         listen: false)

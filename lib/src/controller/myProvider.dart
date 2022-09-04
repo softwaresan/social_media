@@ -7,11 +7,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:social_media/src/model/messageModel.dart';
 import 'package:social_media/src/model/postModel.dart';
 import 'package:social_media/src/model/publicPostModel.dart';
 import 'package:social_media/src/model/social_user_model.dart';
+import 'package:social_media/src/model/videoModel.dart';
 import 'package:social_media/src/screen/profile.dart';
 import 'package:social_media/src/screen/search.dart';
 import 'package:social_media/src/screen/settings.dart';
@@ -185,7 +187,7 @@ class MyProvider with ChangeNotifier {
   String? newPostPath;
   newPostFromGallery() async {
     List<Media>? res = await ImagesPicker.pick(
-      pickType: PickType.all,
+      pickType: PickType.video,
       language: Language.System,
       maxTime: 30,
 
@@ -299,12 +301,12 @@ class MyProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  likePost(String postId, String friendId, bool like) async {
+  likePost(String postId, String friendId, bool like, String type) async {
     if (like) {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(friendId)
-          .collection("myPosts")
+          .collection(type)
           .doc(postId)
           .collection("likes")
           .doc(socialUser!.uid)
@@ -313,7 +315,7 @@ class MyProvider with ChangeNotifier {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(friendId)
-          .collection("myPosts")
+          .collection(type)
           .doc(postId)
           .collection("likes")
           .doc(socialUser!.uid)
@@ -525,16 +527,94 @@ class MyProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> videoController = [
-    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
-  ];
+  XFile? videoFile;
+  bool isVideoPicked = true;
+
+  TextEditingController videoTextController = TextEditingController();
+  pickVideoFromCamera() async {
+    ImagePicker _picker = ImagePicker();
+    videoFile = await _picker.pickVideo(
+        source: ImageSource.camera, maxDuration: const Duration(seconds: 10));
+    isVideoPicked = false;
+    notifyListeners();
+  }
+
+  pickVideoFromGallery() async {
+    ImagePicker _picker = ImagePicker();
+    videoFile = await _picker.pickVideo(
+        source: ImageSource.gallery, maxDuration: const Duration(seconds: 10));
+    isVideoPicked = false;
+    notifyListeners();
+  }
+
+  VideoModel? videoModel;
+  shareVideo(context) async {
+    var ref = await FirebaseStorage.instance
+        .ref()
+        .child("Videos/${Uri.file(videoFile!.path).pathSegments.last}")
+        .putFile(File(videoFile!.path));
+    await ref.ref.getDownloadURL().then((value) {
+      videoModel = VideoModel(
+        videoUrl: value,
+        description: 'description',
+        uid: socialUser!.uid!,
+      );
+    });
+
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("myVideos")
+        .add(videoModel!.toMap());
+    Navigator.pop(context);
+    notifyListeners();
+  }
+
+  List videos = [];
+  List videoUser = [];
+  List descriptionVideo = [];
+  bool isVideoReady = false;
+  List isVideoLiked = [];
+  List videoLikesNumber = [];
+  Future<void> getVideos() async {
+    await FirebaseFirestore.instance
+        .collectionGroup("myVideos")
+        .get()
+        .then((value) async {
+      for (var element in value.docs) {
+        videos.add(element);
+
+        descriptionVideo.add(element["description"]);
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(element["uid"])
+            .get()
+            .then((value) {
+          videoUser.add(value);
+        });
+
+        var likeRef = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(element["uid"])
+            .collection("myVideos")
+            .doc(element["videoId"])
+            .collection("likes");
+        await likeRef.get().then((value) {
+          videoLikesNumber.add(value.docs.length);
+        });
+
+        var isExist = await likeRef.doc(socialUser!.uid).get();
+        isVideoLiked.add(isExist.exists);
+      }
+    });
+
+    isVideoReady = true;
+    notifyListeners();
+  }
 }
 
-//fake comment +1
-//action button chat/on process
-//videos
+
+
 //delete posts and comments
 //notifications
 //error handling/search for chats has a bug

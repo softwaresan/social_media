@@ -4,6 +4,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/screen/addNewVideo.dart';
 import 'package:social_media/src/screen/myChats.dart';
 import 'package:social_media/src/screen/testFile.dart';
 import 'package:social_media/src/screen/videoShowScreen.dart';
@@ -51,13 +52,18 @@ class HomePage extends StatelessWidget {
                       }));
                     },
                     icon: Icon(
-                      Icons.chat_outlined,
+                      Icons.chat,
                       color: tempColor,
                     )),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddNewVideo()));
+                    },
                     icon: Icon(
-                      Icons.add_a_photo_outlined,
+                      Icons.videocam,
                       color: tempColor,
                     ))
               ],

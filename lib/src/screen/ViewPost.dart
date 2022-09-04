@@ -197,7 +197,8 @@ class Viewpost extends StatelessWidget {
                                             .getPosts();
                                         Provider.of<MyProvider>(context,
                                                 listen: false)
-                                            .likePost(postId, userId, isLiked);
+                                            .likePost(postId, userId, isLiked,
+                                                "myPosts");
 
                                         if (isLiked) {
                                           isLiked = !isLiked;
