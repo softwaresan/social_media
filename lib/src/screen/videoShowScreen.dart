@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:video_player/video_player.dart';
@@ -22,6 +24,12 @@ class _VideosState extends State<Videos> {
     Provider.of<MyProvider>(context, listen: false).videos.clear();
     Provider.of<MyProvider>(context, listen: false).isVideoLiked.clear();
     Provider.of<MyProvider>(context, listen: false).videoLikesNumber.clear();
+    Provider.of<MyProvider>(context, listen: false).videoComments.clear();
+    Provider.of<MyProvider>(context, listen: false).videoCommentsNumber.clear();
+    Provider.of<MyProvider>(context, listen: false).usersCommentVideo.clear();
+    Provider.of<MyProvider>(context, listen: false)
+        .eachUserCommentVideo
+        .clear();
 
     Provider.of<MyProvider>(context, listen: false).videoUser.clear();
     Provider.of<MyProvider>(context, listen: false).descriptionVideo.clear();
@@ -129,10 +137,174 @@ class _VideosState extends State<Videos> {
                         SizedBox(
                           height: 20,
                         ),
-                        Icon(
-                          Icons.mode_comment_rounded,
-                          color: Colors.white,
-                          size: 40,
+                        InkWell(
+                          onTap: () {
+                            showBarModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.7,
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                            "Comments: ${Provider.of<MyProvider>(context, listen: false).videoCommentsNumber[index]}"),
+                                        Expanded(
+                                          child: ListView.builder(
+                                              itemCount: Provider.of<
+                                                          MyProvider>(context,
+                                                      listen: false)
+                                                  .videoCommentsNumber[index],
+                                              itemBuilder:
+                                                  (context, commentIndex) {
+                                                return Card(
+                                                  child: ListTile(
+                                                    style: ListTileStyle.drawer,
+                                                    leading: CircleAvatar(
+                                                      backgroundImage: NetworkImage(
+                                                          Provider.of<MyProvider>(
+                                                                          context,
+                                                                          listen: false)
+                                                                      .usersCommentVideo[index]
+                                                                  [commentIndex]
+                                                              ["profileImg"]),
+                                                    ),
+                                                    title: Row(
+                                                      children: [
+                                                        Text(Provider.of<
+                                                                        MyProvider>(
+                                                                    context,
+                                                                    listen: false)
+                                                                .usersCommentVideo[index]
+                                                            [
+                                                            commentIndex]["name"]),
+                                                        Spacer(),
+                                                        Text(
+                                                          Provider.of<MyProvider>(
+                                                                      context,
+                                                                      listen: false)
+                                                                  .videoComments[index]
+                                                              [
+                                                              commentIndex]["dateTime"],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    subtitle: Container(
+                                                      clipBehavior: Clip
+                                                          .antiAliasWithSaveLayer,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.only(
+                                                              bottomLeft: Radius
+                                                                  .circular(10),
+                                                              bottomRight:
+                                                                  Radius
+                                                                      .circular(
+                                                                          10),
+                                                              topRight: Radius
+                                                                  .circular(
+                                                                      10)),
+                                                          color:
+                                                              Colors.grey[300]),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Text(Provider.of<
+                                                                        MyProvider>(
+                                                                    context,
+                                                                    listen: false)
+                                                                .videoComments[index]
+                                                            [
+                                                            commentIndex]["comment"]),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 10,
+                                              right: 10,
+                                              left: 10,
+                                              bottom: MediaQuery.of(context)
+                                                  .viewInsets
+                                                  .bottom),
+                                          child: Row(
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundImage: NetworkImage(
+                                                    Provider.of<MyProvider>(
+                                                            context,
+                                                            listen: false)
+                                                        .socialUser!
+                                                        .profileImg),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Expanded(
+                                                child: Container(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.05,
+                                                  child: TextField(
+                                                    controller: Provider.of<
+                                                                MyProvider>(
+                                                            context,
+                                                            listen: false)
+                                                        .videoCommentController,
+                                                    onSubmitted: (value) {
+                                                      Provider.of<MyProvider>(
+                                                              context,
+                                                              listen: false)
+                                                          .commentPost(
+                                                              Provider.of<MyProvider>(
+                                                                      context,
+                                                                      listen:
+                                                                          false)
+                                                                  .videos[index]
+                                                                      [
+                                                                      "videoId"]
+                                                                  .toString(),
+                                                              Provider.of<MyProvider>(
+                                                                      context,
+                                                                      listen:
+                                                                          false)
+                                                                  .videoUser[
+                                                                      index]
+                                                                      ["uid"]
+                                                                  .toString(),
+                                                              "myVideos");
+                                                    },
+                                                    decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius.all(
+                                                                    Radius.circular(
+                                                                        20))),
+                                                        label: Text(
+                                                            "Write A Comment"),
+                                                        floatingLabelBehavior:
+                                                            FloatingLabelBehavior
+                                                                .never),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                });
+                          },
+                          child: Icon(
+                            Icons.mode_comment_rounded,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
                         SizedBox(
                           height: 20,

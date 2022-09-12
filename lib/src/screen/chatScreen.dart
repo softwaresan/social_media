@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+
+import '../controller/pushNotificationViaRestApi.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatScreen({required this.friendUser, this.lastMsgUserIndex});
@@ -168,13 +171,24 @@ class ChatScreen extends StatelessWidget {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15)),
                           suffixIcon: IconButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (Provider.of<MyProvider>(context,
                                             listen: false)
                                         .messageController
                                         .text
                                         .trim() !=
-                                    "")
+                                    "") {
+                                  var token = await FirebaseMessaging.instance
+                                      .getToken();
+                                  pushNotification push = pushNotification();
+                                  await push.callOnFcmApiSendPushNotifications(
+                                      body: Provider.of<MyProvider>(context,
+                                              listen: false)
+                                          .messageController
+                                          .text,
+                                      title:
+                                          "Message from ${Provider.of<MyProvider>(context, listen: false).socialUser!.name}:",
+                                      token: token);
                                   Provider.of<MyProvider>(context,
                                           listen: false)
                                       .sendMessages(
@@ -186,6 +200,7 @@ class ChatScreen extends StatelessWidget {
                                               .messageController
                                               .text,
                                           lastMsgUserIndex: lastMsgUserIndex);
+                                }
                               },
                               icon: Icon(Icons.send)),
                           label: Text("MESSAGE"),

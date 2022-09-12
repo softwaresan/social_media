@@ -216,7 +216,8 @@ class _HomeState extends State<Home> {
                                             Provider.of<MyProvider>(context,
                                                     listen: false)
                                                 .posts[index]
-                                                .data()["uId"]);
+                                                .data()["uId"],
+                                            "myPosts");
                                   },
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder(

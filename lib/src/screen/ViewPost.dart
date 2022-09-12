@@ -177,7 +177,8 @@ class Viewpost extends StatelessWidget {
                                           onSubmitted: (value) {
                                             Provider.of<MyProvider>(context,
                                                     listen: false)
-                                                .commentPost(postId, userId);
+                                                .commentPost(
+                                                    postId, userId, "myPosts");
                                           },
                                           decoration: InputDecoration(
                                               border: OutlineInputBorder(

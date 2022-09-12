@@ -1,13 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/screen/addNewVideo.dart';
 import 'package:social_media/src/screen/myChats.dart';
 import 'package:social_media/src/screen/testFile.dart';
 import 'package:social_media/src/screen/videoShowScreen.dart';
+
+import '../controller/pushNotificationViaRestApi.dart';
 
 class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
@@ -22,6 +27,7 @@ class HomePage extends StatelessWidget {
     } else {
       return SafeArea(
         child: Scaffold(
+            resizeToAvoidBottomInset: true,
             extendBodyBehindAppBar:
                 Provider.of<MyProvider>(context).currentIndex == 2
                     ? true
@@ -124,4 +130,34 @@ class HomePage extends StatelessWidget {
       );
     }
   }
+
+  // Widget? _showBottomSheet(context) {
+  //   if (Provider.of<MyProvider>(context, listen: false).showBottomSheet) {
+  //     return BottomSheet(
+  //       enableDrag: false,
+  //       onClosing: () {},
+  //       builder: (context) {
+  //         return Container(
+  //           height: 200,
+  //           width: double.infinity,
+  //           color: Colors.grey.shade200,
+  //           alignment: Alignment.center,
+  //           child: ElevatedButton(
+  //             child: Text("Close Bottom Sheet"),
+  //             style: ElevatedButton.styleFrom(
+  //               onPrimary: Colors.white,
+  //               primary: Colors.green,
+  //             ),
+  //             onPressed: () {
+  //               Provider.of<MyProvider>(context, listen: false)
+  //                   .showBottomSheetFunction();
+  //             },
+  //           ),
+  //         );
+  //       },
+  //     );
+  //   } else {
+  //     return null;
+  //   }
+  // }
 }

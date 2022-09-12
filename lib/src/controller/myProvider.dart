@@ -43,6 +43,12 @@ class MyProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool showBottomSheet = false;
+  void showBottomSheetFunction() {
+    showBottomSheet = !showBottomSheet;
+    notifyListeners();
+  }
+
   String? profilePicPath;
   String? coverPicPath;
   String? postImage;
@@ -328,20 +334,26 @@ class MyProvider with ChangeNotifier {
 
   //myPosts  => doc(postId) => Comments => doc(socialUser.id)
 
-  commentPost(String postId, String friendId) async {
-    if (commentController.text.trim() != "") {
+  commentPost(String postId, String friendId, String type) async {
+    if (commentController.text.trim() != "" ||
+        videoCommentController.text != "") {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(friendId)
-          .collection("myPosts")
+          .collection(type)
           .doc(postId)
           .collection("comments")
           .doc(socialUser!.uid)
           .set({
-        "comment": commentController.text.trim(),
+        "comment": type == "myPosts"
+            ? commentController.text.trim()
+            : videoCommentController.text.trim(),
+        "uid": socialUser!.uid,
         "dateTime": DateFormat.yMd().add_jm().format(DateTime.now())
       });
       commentController.text = "";
+      videoCommentController.text = "";
+
       notifyListeners();
     }
   }
@@ -576,6 +588,12 @@ class MyProvider with ChangeNotifier {
   bool isVideoReady = false;
   List isVideoLiked = [];
   List videoLikesNumber = [];
+  List videoComments = [];
+  List videoCommentsNumber = [];
+  List eachUserCommentVideo = [];
+
+  List<List<dynamic>> usersCommentVideo = [];
+  TextEditingController videoCommentController = TextEditingController();
   Future<void> getVideos() async {
     await FirebaseFirestore.instance
         .collectionGroup("myVideos")
@@ -605,8 +623,37 @@ class MyProvider with ChangeNotifier {
 
         var isExist = await likeRef.doc(socialUser!.uid).get();
         isVideoLiked.add(isExist.exists);
+
+        var commentRef = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(element["uid"])
+            .collection("myVideos")
+            .doc(element["videoId"])
+            .collection("comments");
+        await commentRef.get().then((value) async {
+          for (var element in value.docs) {
+            await FirebaseFirestore.instance
+                .collection("users")
+                .doc(element["uid"])
+                .get()
+                .then((value) {
+              print("add to small");
+              eachUserCommentVideo.add(value);
+            });
+          }
+          print("add to large");
+          usersCommentVideo.add(eachUserCommentVideo);
+          print("deleted");
+          eachUserCommentVideo = [];
+        });
+
+        await commentRef.get().then((value) {
+          videoComments.add(value.docs);
+          videoCommentsNumber.add(value.docs.length);
+        });
       }
     });
+    print(usersCommentVideo);
 
     isVideoReady = true;
     notifyListeners();
@@ -616,7 +663,7 @@ class MyProvider with ChangeNotifier {
 
 
 //delete posts and comments
-//notifications
+//notifications 
 //error handling/search for chats has a bug
 //design
 
