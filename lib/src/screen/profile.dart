@@ -16,12 +16,25 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   @override
+  void initState() {
+    super.initState();
+
+    Provider.of<MyProvider>(context, listen: false).isMyAnalysisReady = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
     SocialUser? _socialUser =
         Provider.of<MyProvider>(context, listen: false).socialUser!;
-    if (Provider.of<MyProvider>(context).isLoading) {
+    if (Provider.of<MyProvider>(context).isLoading ||
+        !Provider.of<MyProvider>(context, listen: false).isMyAnalysisReady) {
+      Future.delayed(Duration.zero, () async {
+        await Provider.of<MyProvider>(context, listen: false).getMyAnalysis(
+            Provider.of<MyProvider>(context, listen: false).socialUser!.uid);
+      });
+
       _socialUser = Provider.of<MyProvider>(context, listen: false).socialUser!;
-      return CircularProgressIndicator();
+      return Center(child: CircularProgressIndicator());
     } else {
       return RefreshIndicator(
         onRefresh: () {
@@ -63,10 +76,38 @@ class _ProfileState extends State<Profile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text("Posts", style: Theme.of(context).textTheme.subtitle1),
-                Text("Followers", style: Theme.of(context).textTheme.subtitle1),
-                Text("Followings",
-                    style: Theme.of(context).textTheme.subtitle1),
+                Column(
+                  children: [
+                    Text("Posts", style: Theme.of(context).textTheme.subtitle1),
+                    Text(
+                        Provider.of<MyProvider>(context, listen: false)
+                            .myPosts
+                            .toString(),
+                        style: Theme.of(context).textTheme.subtitle1),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text("Followers",
+                        style: Theme.of(context).textTheme.subtitle1),
+                    Text(
+                        Provider.of<MyProvider>(context, listen: false)
+                            .myFollowers
+                            .toString(),
+                        style: Theme.of(context).textTheme.subtitle1)
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text("Followings",
+                        style: Theme.of(context).textTheme.subtitle1),
+                    Text(
+                        Provider.of<MyProvider>(context, listen: false)
+                            .myFollowings
+                            .toString(),
+                        style: Theme.of(context).textTheme.subtitle1)
+                  ],
+                ),
               ],
             ),
             SizedBox(height: 10),

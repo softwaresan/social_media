@@ -25,9 +25,10 @@ class _ViewProfileState extends State<ViewProfile> {
 
   @override
   void initState() {
-    print("hello");
-    followState = widget.isFollowed ? "unFollow" : "Follow";
     super.initState();
+    Provider.of<MyProvider>(context, listen: false).isMyAnalysisReady = false;
+    print("hello");
+    followState = widget.isFollowed ? "UnFollow" : "Follow";
   }
 
   @override
@@ -67,105 +68,168 @@ class _ViewProfileState extends State<ViewProfile> {
         elevation: 0,
         backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        child: Column(children: [
-          Stack(
-              alignment: AlignmentDirectional.center,
-              clipBehavior: Clip.none,
-              children: [
-                SizedBox(
-                  height: 200,
-                  width: double.infinity,
-                  child: Image.network(
-                    widget.friendUser!["coverImg"],
-                    fit: BoxFit.fill,
-                  ),
-                ),
-                Positioned(
-                  top: 120,
-                  child: CircleAvatar(
-                      radius: 65,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundImage:
-                            NetworkImage(widget.friendUser!["profileImg"]),
-                      )),
-                )
-              ]),
-          SizedBox(height: 50),
-          Text(widget.friendUser!["name"],
-              style: Theme.of(context).textTheme.subtitle1),
-          SizedBox(height: 5),
-          Text(widget.friendUser!["bio"],
-              style: Theme.of(context).textTheme.caption),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Text("Posts", style: Theme.of(context).textTheme.subtitle1),
-              Text("Followers", style: Theme.of(context).textTheme.subtitle1),
-              Text("Followings", style: Theme.of(context).textTheme.subtitle1),
-            ],
-          ),
-          SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                  onPressed: () async {
-                    Provider.of<MyProvider>(context, listen: false).followUser(
-                        widget.friendUser!["uid"],
-                        widget.friendUser!["name"],
-                        widget.isFollowed);
+      body: Builder(builder: (context) {
+        if (!Provider.of<MyProvider>(context).isMyAnalysisReady) {
+          Future.delayed(Duration.zero, () async {
+            Provider.of<MyProvider>(context, listen: false)
+                .getMyAnalysis(widget.friendUser["uid"]);
+          });
 
-                    if (widget.isFollowed) {
-                      followState = "Follow";
-                      widget.isFollowed = !widget.isFollowed;
+          return CircularProgressIndicator();
+        } else {
+          return SingleChildScrollView(
+            child: Column(children: [
+              Stack(
+                  alignment: AlignmentDirectional.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    SizedBox(
+                      height: 200,
+                      width: double.infinity,
+                      child: Image.network(
+                        widget.friendUser!["coverImg"],
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    Positioned(
+                      top: 120,
+                      child: CircleAvatar(
+                          radius: 65,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundImage:
+                                NetworkImage(widget.friendUser!["profileImg"]),
+                          )),
+                    )
+                  ]),
+              SizedBox(height: 50),
+              Text(widget.friendUser!["name"],
+                  style: Theme.of(context).textTheme.subtitle1),
+              SizedBox(height: 5),
+              Text(widget.friendUser!["bio"],
+                  style: Theme.of(context).textTheme.caption),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      Text("Posts",
+                          style: Theme.of(context).textTheme.subtitle1),
+                      Text(
+                          Provider.of<MyProvider>(context, listen: false)
+                              .myPosts
+                              .toString(),
+                          style: Theme.of(context).textTheme.subtitle1),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text("Followers",
+                          style: Theme.of(context).textTheme.subtitle1),
+                      Text(
+                          Provider.of<MyProvider>(context, listen: false)
+                              .myFollowers
+                              .toString(),
+                          style: Theme.of(context).textTheme.subtitle1)
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text("Followings",
+                          style: Theme.of(context).textTheme.subtitle1),
+                      Text(
+                          Provider.of<MyProvider>(context, listen: false)
+                              .myFollowings
+                              .toString(),
+                          style: Theme.of(context).textTheme.subtitle1)
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(
+                  width: double.infinity,
+                  child: GestureDetector(
+                    onTap: () async {
+                      Provider.of<MyProvider>(context, listen: false)
+                          .followUser(widget.friendUser!["uid"],
+                              widget.friendUser!["name"], widget.isFollowed);
+
+                      if (widget.isFollowed) {
+                        followState = "Follow";
+                        widget.isFollowed = !widget.isFollowed;
+                      } else {
+                        followState = "UnFollow";
+                        widget.isFollowed = !widget.isFollowed;
+                      }
+                      setState(() {});
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(),
+                            color: widget.isFollowed
+                                ? Colors.transparent
+                                : Colors.blue,
+                          ),
+                          width: double.infinity,
+                          height: MediaQuery.of(context).size.height * 0.05,
+                          child: Center(
+                              child: Text(
+                            "$followState",
+                            style: TextStyle(
+                              color: widget.isFollowed
+                                  ? Colors.black
+                                  : Colors.white,
+                            ),
+                          ))),
+                    ),
+                  )),
+              Padding(
+                padding: const EdgeInsets.only(top: 0),
+                child: Container(
+                  color: Colors.grey[300],
+                  height: 1,
+                ),
+              ),
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(widget.friendUser!["uid"])
+                      .collection("myPosts")
+                      .orderBy("dateTime", descending: true)
+                      .snapshots(),
+                  builder: (context,
+                      AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+                          snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
                     } else {
-                      followState = "unFollow";
-                      widget.isFollowed = !widget.isFollowed;
+                      return SizedBox(
+                        child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: snapshot.data!.docs.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 4,
+                                    mainAxisSpacing: 5),
+                            itemBuilder: (context, index) {
+                              return Image.network(
+                                snapshot.data!.docs[index].data()["postImage"],
+                                fit: BoxFit.fill,
+                              );
+                            }),
+                      );
                     }
-                    setState(() {});
-                  },
-                  child: Text("$followState"))),
-          Padding(
-            padding: const EdgeInsets.only(top: 0),
-            child: Container(
-              color: Colors.grey[300],
-              height: 1,
-            ),
-          ),
-          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection("users")
-                  .doc(widget.friendUser!["uid"])
-                  .collection("myPosts")
-                  .orderBy("dateTime", descending: true)
-                  .snapshots(),
-              builder: (context,
-                  AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  return SizedBox(
-                    child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: snapshot.data!.docs.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 4,
-                            mainAxisSpacing: 5),
-                        itemBuilder: (context, index) {
-                          return Image.network(
-                            snapshot.data!.docs[index].data()["postImage"],
-                            fit: BoxFit.fill,
-                          );
-                        }),
-                  );
-                }
-              })
-        ]),
-      ),
+                  })
+            ]),
+          );
+        }
+      }),
     );
   }
 }

@@ -590,9 +590,9 @@ class MyProvider with ChangeNotifier {
   List videoLikesNumber = [];
   List videoComments = [];
   List videoCommentsNumber = [];
-  List eachUserCommentVideo = [];
+  List userCommentVideoTemp = [];
 
-  List<List<dynamic>> usersCommentVideo = [];
+  List usersCommentVideo = [];
   TextEditingController videoCommentController = TextEditingController();
   Future<void> getVideos() async {
     await FirebaseFirestore.instance
@@ -623,39 +623,76 @@ class MyProvider with ChangeNotifier {
 
         var isExist = await likeRef.doc(socialUser!.uid).get();
         isVideoLiked.add(isExist.exists);
+      }
+    });
+    isVideoReady = true;
+    notifyListeners();
+  }
 
-        var commentRef = await FirebaseFirestore.instance
+  bool isVideoCommentsReady = false;
+  Future<void> getVideoComments(String videoId, String uid) async {
+    isVideoCommentsReady = false;
+    var commentRef = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .collection("myVideos")
+        .doc(videoId)
+        .collection("comments");
+    await commentRef.get().then((value) async {
+      print(videoId);
+
+      for (var element in value.docs) {
+        await FirebaseFirestore.instance
             .collection("users")
             .doc(element["uid"])
-            .collection("myVideos")
-            .doc(element["videoId"])
-            .collection("comments");
-        await commentRef.get().then((value) async {
-          for (var element in value.docs) {
-            await FirebaseFirestore.instance
-                .collection("users")
-                .doc(element["uid"])
-                .get()
-                .then((value) {
-              print("add to small");
-              eachUserCommentVideo.add(value);
-            });
-          }
-          print("add to large");
-          usersCommentVideo.add(eachUserCommentVideo);
-          print("deleted");
-          eachUserCommentVideo = [];
-        });
-
-        await commentRef.get().then((value) {
-          videoComments.add(value.docs);
-          videoCommentsNumber.add(value.docs.length);
+            .get()
+            .then((value) {
+          usersCommentVideo.add({
+            "name": value["name"],
+            "dateTime": element.data()["dateTime"],
+            "comment": element.data()["comment"],
+            "profileImg": value["profileImg"]
+          });
         });
       }
     });
     print(usersCommentVideo);
+    isVideoCommentsReady = true;
 
-    isVideoReady = true;
+    notifyListeners();
+  }
+
+  int myFollowings = 0;
+  int myFollowers = 0;
+  int myPosts = 0;
+  bool isMyAnalysisReady = false;
+  Future<void> getMyAnalysis(uid) async {
+    isMyAnalysisReady = false;
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .collection("followings")
+        .get()
+        .then((value) {
+      myFollowings = value.docs.length;
+    });
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .collection("followers")
+        .get()
+        .then((value) {
+      myFollowers = value.docs.length;
+    });
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .collection("myPosts")
+        .get()
+        .then((value) {
+      myPosts = value.docs.length;
+    });
+    isMyAnalysisReady = true;
     notifyListeners();
   }
 }
