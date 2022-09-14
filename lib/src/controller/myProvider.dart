@@ -193,7 +193,7 @@ class MyProvider with ChangeNotifier {
   String? newPostPath;
   newPostFromGallery() async {
     List<Media>? res = await ImagesPicker.pick(
-      pickType: PickType.video,
+      pickType: PickType.image,
       language: Language.System,
       maxTime: 30,
 
@@ -378,7 +378,6 @@ class MyProvider with ChangeNotifier {
 
       await friendRef.set({"name": socialUser!.name, "uId": socialUser!.uid});
     }
-    notifyListeners();
   }
 
   List followings = [];
@@ -561,23 +560,27 @@ class MyProvider with ChangeNotifier {
 
   VideoModel? videoModel;
   shareVideo(context) async {
+    Uuid uuid = Uuid();
+    var videoId = uuid.v1();
+
     var ref = await FirebaseStorage.instance
         .ref()
         .child("Videos/${Uri.file(videoFile!.path).pathSegments.last}")
         .putFile(File(videoFile!.path));
     await ref.ref.getDownloadURL().then((value) {
       videoModel = VideoModel(
-        videoUrl: value,
-        description: 'description',
-        uid: socialUser!.uid!,
-      );
+          videoUrl: value,
+          description: 'description',
+          uid: socialUser!.uid!,
+          videoId: videoId);
     });
 
     await FirebaseFirestore.instance
         .collection("users")
         .doc(socialUser!.uid)
         .collection("myVideos")
-        .add(videoModel!.toMap());
+        .doc(videoId)
+        .set(videoModel!.toMap());
     Navigator.pop(context);
     notifyListeners();
   }
@@ -611,7 +614,7 @@ class MyProvider with ChangeNotifier {
           videoUser.add(value);
         });
 
-        var likeRef = await FirebaseFirestore.instance
+        var likeRef = FirebaseFirestore.instance
             .collection("users")
             .doc(element["uid"])
             .collection("myVideos")
@@ -665,24 +668,43 @@ class MyProvider with ChangeNotifier {
   int myFollowings = 0;
   int myFollowers = 0;
   int myPosts = 0;
+  List myFollowingsUsers = [];
+  List myFollowersUsers = [];
   bool isMyAnalysisReady = false;
   Future<void> getMyAnalysis(uid) async {
+    myFollowersUsers = [];
+    myFollowingsUsers = [];
+
     isMyAnalysisReady = false;
     await FirebaseFirestore.instance
         .collection("users")
         .doc(uid)
         .collection("followings")
         .get()
-        .then((value) {
+        .then((value) async {
       myFollowings = value.docs.length;
+      for (var following in value.docs) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(following.id)
+            .get()
+            .then((value) => myFollowingsUsers.add(value));
+      }
     });
     await FirebaseFirestore.instance
         .collection("users")
         .doc(uid)
         .collection("followers")
         .get()
-        .then((value) {
+        .then((value) async {
       myFollowers = value.docs.length;
+      for (var follower in value.docs) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(follower.id)
+            .get()
+            .then((value) => myFollowersUsers.add(value));
+      }
     });
     await FirebaseFirestore.instance
         .collection("users")
@@ -695,12 +717,81 @@ class MyProvider with ChangeNotifier {
     isMyAnalysisReady = true;
     notifyListeners();
   }
+
+  restartMyAnalysis() {
+    isMyAnalysisReady = false;
+    notifyListeners();
+  }
+
+  shareStory(context) async {
+    String? storyUrl;
+    Uuid uuid = Uuid();
+    var ref = await FirebaseStorage.instance
+        .ref()
+        .child("newStory/${Uri.file(newPostPath!).pathSegments.last}")
+        .putFile(File(newPostPath!));
+    await ref.ref.getDownloadURL().then((value) {
+      storyUrl = value;
+    });
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(socialUser!.uid)
+        .collection("myStories")
+        .doc(uuid.v1())
+        .set({
+      "dateTime": DateTime.now(),
+      "expiredDate": DateTime.now().add(Duration(days: 1)),
+      "storyUrl": storyUrl,
+      "uid": socialUser!.uid,
+      "storyId": uuid.v1()
+    });
+    newPostPath = null;
+
+    Navigator.pop(context);
+    notifyListeners();
+  }
+
+  List stories = [];
+  List storyUser = [];
+  getStories() async {
+    print(DateTime.now().add(Duration(days: 1)));
+    stories = [];
+    storyUser = [];
+    for (var element in followings) {
+      var storiesRef = FirebaseFirestore.instance
+          .collection("users")
+          .doc(element.id)
+          .collection("myStories")
+          .where(
+            "expiredDate",
+            isGreaterThan: DateTime.now(),
+          );
+
+      await storiesRef.get().then((value) async {
+        if (value.docs.isNotEmpty) {
+          stories.add(value.docs);
+          await FirebaseFirestore.instance
+              .collection("users")
+              .doc(element.id)
+              .get()
+              .then((value) {
+            storyUser.add(value);
+          });
+        }
+      });
+    }
+    notifyListeners();
+  }
+
+  // bool isDarkMode = false;
+  // changeThemeMode() {
+  //   isDarkMode = !isDarkMode;
+  //   notifyListeners();
+  // }
 }
 
 
 
-//delete posts and comments
-//notifications 
-//error handling/search for chats has a bug
-//design
+//delete posts 
+//design/dark mode
 

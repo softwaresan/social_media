@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/controller/pushNotificationViaRestApi.dart';
+import 'package:social_media/src/controller/themeProvider.dart';
 import 'package:social_media/src/screen/home_page_screen.dart';
 import 'package:social_media/src/screen/sign_in_screen.dart';
 
@@ -53,6 +54,9 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+        ChangeNotifierProvider(
           create: (_) => MyProvider(),
         ),
       ],
@@ -64,16 +68,25 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (FirebaseAuth.instance.currentUser != null) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: HomePage(),
-      );
-    } else {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: SignIn(),
-      );
-    }
+    return MaterialApp(
+      theme: ThemeData(
+        primaryColor: Colors.black,
+        scaffoldBackgroundColor: Colors.white,
+        brightness: Brightness.light,
+        /* dark theme settings */
+      ),
+      darkTheme: ThemeData(
+        primaryColor: Colors.white,
+        scaffoldBackgroundColor: Colors.grey[900],
+        cardColor: Colors.grey[900],
+        brightness: Brightness.dark,
+        /* dark theme settings */
+      ),
+      themeMode: Provider.of<ThemeProvider>(context).isDarkMode
+          ? ThemeMode.dark
+          : ThemeMode.light,
+      debugShowCheckedModeBanner: false,
+      home: FirebaseAuth.instance.currentUser != null ? HomePage() : SignIn(),
+    );
   }
 }

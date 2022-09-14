@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/myProvider.dart';
+import '../controller/themeProvider.dart';
 
 class Viewpost extends StatelessWidget {
   Viewpost(
@@ -36,9 +37,9 @@ class Viewpost extends StatelessWidget {
     print("$numberOfLikes elel");
     return SafeArea(
         child: Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
           "COMMENTS",
@@ -50,7 +51,7 @@ class Viewpost extends StatelessWidget {
             },
             icon: Icon(
               Icons.arrow_back_ios,
-              color: Colors.black,
+              color: Theme.of(context).primaryColor,
             )),
       ),
       body: SingleChildScrollView(
@@ -274,7 +275,12 @@ class Viewpost extends StatelessWidget {
                                                       Radius.circular(10),
                                                   topRight:
                                                       Radius.circular(10)),
-                                              color: Colors.grey[300]),
+                                              color: Provider.of<ThemeProvider>(
+                                                          context,
+                                                          listen: false)
+                                                      .isDarkMode
+                                                  ? Colors.grey[800]
+                                                  : Colors.grey[300]),
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Text(snapshot

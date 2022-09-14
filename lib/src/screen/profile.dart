@@ -5,9 +5,12 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/controller/themeProvider.dart';
 import 'package:social_media/src/model/social_user_model.dart';
 import 'package:social_media/src/screen/addNewPost.dart';
 import 'package:social_media/src/screen/editProfileScreen.dart';
+import 'package:social_media/src/screen/myFollowers.dart';
+import 'package:social_media/src/screen/myFollowings.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -15,11 +18,29 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  int? _myPosts;
+  int? _myFollowings;
+  int? _myFollowers;
+  var _myFollowingsUsers = [];
+  var _myFollowersUsers = [];
   @override
   void initState() {
     super.initState();
 
     Provider.of<MyProvider>(context, listen: false).isMyAnalysisReady = false;
+    Future.delayed(Duration.zero, () async {
+      await Provider.of<MyProvider>(context, listen: false).getMyAnalysis(
+          Provider.of<MyProvider>(context, listen: false).socialUser!.uid);
+      _myPosts = Provider.of<MyProvider>(context, listen: false).myPosts;
+      _myFollowings =
+          Provider.of<MyProvider>(context, listen: false).myFollowings;
+      _myFollowers =
+          Provider.of<MyProvider>(context, listen: false).myFollowers;
+      _myFollowingsUsers =
+          Provider.of<MyProvider>(context, listen: false).myFollowingsUsers;
+      _myFollowersUsers =
+          Provider.of<MyProvider>(context, listen: false).myFollowersUsers;
+    });
   }
 
   @override
@@ -28,11 +49,6 @@ class _ProfileState extends State<Profile> {
         Provider.of<MyProvider>(context, listen: false).socialUser!;
     if (Provider.of<MyProvider>(context).isLoading ||
         !Provider.of<MyProvider>(context, listen: false).isMyAnalysisReady) {
-      Future.delayed(Duration.zero, () async {
-        await Provider.of<MyProvider>(context, listen: false).getMyAnalysis(
-            Provider.of<MyProvider>(context, listen: false).socialUser!.uid);
-      });
-
       _socialUser = Provider.of<MyProvider>(context, listen: false).socialUser!;
       return Center(child: CircularProgressIndicator());
     } else {
@@ -60,7 +76,8 @@ class _ProfileState extends State<Profile> {
                     top: 120,
                     child: CircleAvatar(
                         radius: 65,
-                        backgroundColor: Colors.white,
+                        backgroundColor:
+                            Theme.of(context).scaffoldBackgroundColor,
                         child: CircleAvatar(
                           radius: 60,
                           backgroundImage: NetworkImage(_socialUser.profileImg),
@@ -79,34 +96,41 @@ class _ProfileState extends State<Profile> {
                 Column(
                   children: [
                     Text("Posts", style: Theme.of(context).textTheme.subtitle1),
-                    Text(
-                        Provider.of<MyProvider>(context, listen: false)
-                            .myPosts
-                            .toString(),
+                    Text(_myPosts.toString(),
                         style: Theme.of(context).textTheme.subtitle1),
                   ],
                 ),
-                Column(
-                  children: [
-                    Text("Followers",
-                        style: Theme.of(context).textTheme.subtitle1),
-                    Text(
-                        Provider.of<MyProvider>(context, listen: false)
-                            .myFollowers
-                            .toString(),
-                        style: Theme.of(context).textTheme.subtitle1)
-                  ],
+                InkWell(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MyFollowers(
+                              myFollowersUsers: _myFollowersUsers))),
+                  child: Column(
+                    children: [
+                      Text("Followers",
+                          style: Theme.of(context).textTheme.subtitle1),
+                      Text(_myFollowers.toString(),
+                          style: Theme.of(context).textTheme.subtitle1)
+                    ],
+                  ),
                 ),
-                Column(
-                  children: [
-                    Text("Followings",
-                        style: Theme.of(context).textTheme.subtitle1),
-                    Text(
-                        Provider.of<MyProvider>(context, listen: false)
-                            .myFollowings
-                            .toString(),
-                        style: Theme.of(context).textTheme.subtitle1)
-                  ],
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyFollowings(
+                                myFollowingsUsers: _myFollowingsUsers)));
+                  },
+                  child: Column(
+                    children: [
+                      Text("Followings",
+                          style: Theme.of(context).textTheme.subtitle1),
+                      Text(_myFollowings.toString(),
+                          style: Theme.of(context).textTheme.subtitle1)
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -124,8 +148,18 @@ class _ProfileState extends State<Profile> {
                                 builder: (context) => AddNewPost()));
                       },
                       child: Text("ADD PHOTO",
-                          style: TextStyle(color: Colors.blue)),
-                      style: ElevatedButton.styleFrom(primary: Colors.white))),
+                          style: TextStyle(
+                              color: Provider.of<ThemeProvider>(context,
+                                          listen: false)
+                                      .isDarkMode
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.blue)),
+                      style: ElevatedButton.styleFrom(
+                          primary:
+                              Provider.of<ThemeProvider>(context, listen: false)
+                                      .isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.white))),
               ElevatedButton(
                   onPressed: () {
                     Provider.of<MyProvider>(context, listen: false)
@@ -142,8 +176,17 @@ class _ProfileState extends State<Profile> {
                       return EditProfile();
                     }));
                   },
-                  child: Icon(Icons.edit, color: Colors.blue),
-                  style: ElevatedButton.styleFrom(primary: Colors.white))
+                  child: Icon(Icons.edit,
+                      color: Provider.of<ThemeProvider>(context, listen: false)
+                              .isDarkMode
+                          ? Theme.of(context).primaryColor
+                          : Colors.blue),
+                  style: ElevatedButton.styleFrom(
+                      primary:
+                          Provider.of<ThemeProvider>(context, listen: false)
+                                  .isDarkMode
+                              ? Colors.grey[800]
+                              : Colors.white))
             ]),
             StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance

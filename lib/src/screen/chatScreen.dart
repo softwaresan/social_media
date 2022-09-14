@@ -8,6 +8,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/controller/themeProvider.dart';
 
 import '../controller/pushNotificationViaRestApi.dart';
 
@@ -20,18 +21,18 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               titleSpacing: -25,
               elevation: 1,
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               leading: IconButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
                   icon: Icon(
                     Icons.arrow_back_ios,
-                    color: Colors.black,
+                    color: Theme.of(context).primaryColor,
                   )),
               title: ListTile(
                 horizontalTitleGap: 10,
@@ -80,7 +81,13 @@ class ChatScreen extends StatelessWidget {
                                             padding: const EdgeInsets.all(10.0),
                                             child: Container(
                                                 decoration: BoxDecoration(
-                                                    color: Colors.grey[300],
+                                                    color: Provider.of<
+                                                                    ThemeProvider>(
+                                                                context,
+                                                                listen: false)
+                                                            .isDarkMode
+                                                        ? Colors.grey[800]
+                                                        : Colors.grey[300],
                                                     borderRadius:
                                                         BorderRadius.only(
                                                             topLeft:
@@ -112,8 +119,14 @@ class ChatScreen extends StatelessWidget {
                                             padding: const EdgeInsets.all(10.0),
                                             child: Container(
                                                 decoration: BoxDecoration(
-                                                    color:
-                                                        Colors.lightBlueAccent,
+                                                    color: Provider.of<
+                                                                    ThemeProvider>(
+                                                                context,
+                                                                listen: false)
+                                                            .isDarkMode
+                                                        ? Colors.blue[900]
+                                                        : Colors
+                                                            .lightBlueAccent,
                                                     borderRadius:
                                                         BorderRadius.only(
                                                             topLeft:

@@ -6,6 +6,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/controller/themeProvider.dart';
 import 'package:social_media/src/model/social_user_model.dart';
 import 'package:social_media/src/widgets/customTextField.dart';
 
@@ -15,16 +16,17 @@ class EditProfile extends StatelessWidget {
     SocialUser? _socialUser = Provider.of<MyProvider>(context).socialUser!;
     return SafeArea(
         child: Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 elevation: 0,
                 titleSpacing: 5,
                 leading: IconButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    icon: Icon(Icons.arrow_back_outlined, color: Colors.black)),
+                    icon: Icon(Icons.arrow_back_outlined,
+                        color: Theme.of(context).primaryColor)),
                 title: Text("EDIT PROFILE",
                     style: Theme.of(context).textTheme.subtitle1),
                 actions: [
@@ -33,7 +35,10 @@ class EditProfile extends StatelessWidget {
                         Provider.of<MyProvider>(context, listen: false)
                             .updateUserProfile(context);
                       },
-                      child: Text("UPDATE")),
+                      child: Text(
+                        "UPDATE",
+                        style: TextStyle(color: Colors.lightBlueAccent),
+                      )),
                   SizedBox(width: 10)
                 ]),
             body: Column(children: [
@@ -69,7 +74,11 @@ class EditProfile extends StatelessWidget {
                     child: Stack(alignment: Alignment.bottomRight, children: [
                       CircleAvatar(
                           radius: 65,
-                          backgroundColor: Colors.white,
+                          backgroundColor:
+                              Provider.of<ThemeProvider>(context, listen: false)
+                                      .isDarkMode
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Colors.white,
                           child: CircleAvatar(
                             radius: 60,
                             backgroundImage: Provider.of<MyProvider>(context)

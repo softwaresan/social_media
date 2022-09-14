@@ -5,21 +5,25 @@ class VideoModel {
   String videoUrl;
   String description;
   String uid;
+  String videoId;
   VideoModel({
     required this.videoUrl,
     required this.description,
     required this.uid,
+    required this.videoId,
   });
 
   VideoModel copyWith({
     String? videoUrl,
     String? description,
     String? uid,
+    String? videoId,
   }) {
     return VideoModel(
       videoUrl: videoUrl ?? this.videoUrl,
       description: description ?? this.description,
       uid: uid ?? this.uid,
+      videoId: videoId ?? this.videoId,
     );
   }
 
@@ -28,6 +32,7 @@ class VideoModel {
       'videoUrl': videoUrl,
       'description': description,
       'uid': uid,
+      'videoId': videoId,
     };
   }
 
@@ -36,6 +41,7 @@ class VideoModel {
       videoUrl: map['videoUrl'] as String,
       description: map['description'] as String,
       uid: map['uid'] as String,
+      videoId: map['videoId'] as String,
     );
   }
 
@@ -45,8 +51,9 @@ class VideoModel {
       VideoModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() =>
-      'VideoModel(videoUrl: $videoUrl, description: $description, uid: $uid)';
+  String toString() {
+    return 'VideoModel(videoUrl: $videoUrl, description: $description, uid: $uid, videoId: $videoId)';
+  }
 
   @override
   bool operator ==(covariant VideoModel other) {
@@ -54,9 +61,15 @@ class VideoModel {
 
     return other.videoUrl == videoUrl &&
         other.description == description &&
-        other.uid == uid;
+        other.uid == uid &&
+        other.videoId == videoId;
   }
 
   @override
-  int get hashCode => videoUrl.hashCode ^ description.hashCode ^ uid.hashCode;
+  int get hashCode {
+    return videoUrl.hashCode ^
+        description.hashCode ^
+        uid.hashCode ^
+        videoId.hashCode;
+  }
 }

@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     Color tempColor = Provider.of<MyProvider>(context).currentIndex == 2
         ? Colors.white
-        : Colors.black;
+        : Theme.of(context).primaryColor;
 
     if (Provider.of<MyProvider>(context).isLoading) {
       Provider.of<MyProvider>(context, listen: false).getUserData();
@@ -37,12 +37,12 @@ class HomePage extends StatelessWidget {
                 : false,
             backgroundColor: Provider.of<MyProvider>(context).currentIndex == 2
                 ? Colors.transparent
-                : Colors.white,
+                : Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               backgroundColor:
                   Provider.of<MyProvider>(context).currentIndex == 2
                       ? Colors.transparent
-                      : Colors.white,
+                      : Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
               title: Provider.of<MyProvider>(context).currentIndex == 2
                   ? Text("Home", style: TextStyle(color: Colors.white))
@@ -83,7 +83,7 @@ class HomePage extends StatelessWidget {
               backgroundColor:
                   Provider.of<MyProvider>(context).currentIndex == 2
                       ? Colors.transparent
-                      : Colors.white,
+                      : Theme.of(context).scaffoldBackgroundColor,
               showSelectedLabels: false,
               showUnselectedLabels: false,
               currentIndex: Provider.of<MyProvider>(context).currentIndex,

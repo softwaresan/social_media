@@ -10,6 +10,10 @@ import 'package:social_media/src/screen/addNewPost.dart';
 import 'package:social_media/src/screen/chatScreen.dart';
 import 'package:social_media/src/screen/editProfileScreen.dart';
 
+import '../controller/themeProvider.dart';
+import 'myFollowers.dart';
+import 'myFollowings.dart';
+
 class ViewProfile extends StatefulWidget {
   ViewProfile({Key? key, this.friendUser, required this.isFollowed})
       : super(key: key);
@@ -22,19 +26,40 @@ class ViewProfile extends StatefulWidget {
 
 class _ViewProfileState extends State<ViewProfile> {
   String? followState;
+  int? _myPosts;
+  int? _myFollowings;
+  int? _myFollowers;
+  var _myFollowingsUsers = [];
+  var _myFollowersUsers = [];
 
   @override
   void initState() {
     super.initState();
+
     Provider.of<MyProvider>(context, listen: false).isMyAnalysisReady = false;
+    Future.delayed(Duration.zero, () async {
+      await Provider.of<MyProvider>(context, listen: false)
+          .getMyAnalysis(widget.friendUser["uid"]);
+      _myPosts = Provider.of<MyProvider>(context, listen: false).myPosts;
+      _myFollowings =
+          Provider.of<MyProvider>(context, listen: false).myFollowings;
+      _myFollowers =
+          Provider.of<MyProvider>(context, listen: false).myFollowers;
+      _myFollowingsUsers =
+          Provider.of<MyProvider>(context, listen: false).myFollowingsUsers;
+      _myFollowersUsers =
+          Provider.of<MyProvider>(context, listen: false).myFollowersUsers;
+    });
+
     print("hello");
+
     followState = widget.isFollowed ? "UnFollow" : "Follow";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         actions: [
           IconButton(
@@ -48,7 +73,7 @@ class _ViewProfileState extends State<ViewProfile> {
               },
               icon: Icon(
                 Icons.chat_outlined,
-                color: Colors.black,
+                color: Theme.of(context).primaryColor,
               ))
         ],
         centerTitle: true,
@@ -62,18 +87,24 @@ class _ViewProfileState extends State<ViewProfile> {
           },
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            color: Theme.of(context).primaryColor,
           ),
         ),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Builder(builder: (context) {
         if (!Provider.of<MyProvider>(context).isMyAnalysisReady) {
-          Future.delayed(Duration.zero, () async {
-            Provider.of<MyProvider>(context, listen: false)
-                .getMyAnalysis(widget.friendUser["uid"]);
-          });
+          // _myPosts = Provider.of<MyProvider>(context, listen: false).myPosts;
+          // _myFollowings =
+          //     Provider.of<MyProvider>(context, listen: false).myFollowings;
+          // _myFollowers =
+          //     Provider.of<MyProvider>(context, listen: false).myFollowers;
+
+          // Future.delayed(Duration.zero, () async {
+          //   Provider.of<MyProvider>(context, listen: false)
+          //       .getMyAnalysis(widget.friendUser["uid"]);
+          // });
 
           return CircularProgressIndicator();
         } else {
@@ -95,7 +126,8 @@ class _ViewProfileState extends State<ViewProfile> {
                       top: 120,
                       child: CircleAvatar(
                           radius: 65,
-                          backgroundColor: Colors.white,
+                          backgroundColor:
+                              Theme.of(context).scaffoldBackgroundColor,
                           child: CircleAvatar(
                             radius: 60,
                             backgroundImage:
@@ -117,34 +149,42 @@ class _ViewProfileState extends State<ViewProfile> {
                     children: [
                       Text("Posts",
                           style: Theme.of(context).textTheme.subtitle1),
-                      Text(
-                          Provider.of<MyProvider>(context, listen: false)
-                              .myPosts
-                              .toString(),
+                      Text(_myPosts.toString(),
                           style: Theme.of(context).textTheme.subtitle1),
                     ],
                   ),
-                  Column(
-                    children: [
-                      Text("Followers",
-                          style: Theme.of(context).textTheme.subtitle1),
-                      Text(
-                          Provider.of<MyProvider>(context, listen: false)
-                              .myFollowers
-                              .toString(),
-                          style: Theme.of(context).textTheme.subtitle1)
-                    ],
+                  InkWell(
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyFollowers(
+                                  myFollowersUsers: _myFollowersUsers,
+                                ))),
+                    child: Column(
+                      children: [
+                        Text("Followers",
+                            style: Theme.of(context).textTheme.subtitle1),
+                        Text(_myFollowers.toString(),
+                            style: Theme.of(context).textTheme.subtitle1)
+                      ],
+                    ),
                   ),
-                  Column(
-                    children: [
-                      Text("Followings",
-                          style: Theme.of(context).textTheme.subtitle1),
-                      Text(
-                          Provider.of<MyProvider>(context, listen: false)
-                              .myFollowings
-                              .toString(),
-                          style: Theme.of(context).textTheme.subtitle1)
-                    ],
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MyFollowings(
+                                  myFollowingsUsers: _myFollowingsUsers)));
+                    },
+                    child: Column(
+                      children: [
+                        Text("Followings",
+                            style: Theme.of(context).textTheme.subtitle1),
+                        Text(_myFollowings.toString(),
+                            style: Theme.of(context).textTheme.subtitle1)
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -152,6 +192,7 @@ class _ViewProfileState extends State<ViewProfile> {
                   width: double.infinity,
                   child: GestureDetector(
                     onTap: () async {
+                      print(widget.isFollowed);
                       Provider.of<MyProvider>(context, listen: false)
                           .followUser(widget.friendUser!["uid"],
                               widget.friendUser!["name"], widget.isFollowed);
@@ -171,7 +212,11 @@ class _ViewProfileState extends State<ViewProfile> {
                           decoration: BoxDecoration(
                             border: Border.all(),
                             color: widget.isFollowed
-                                ? Colors.transparent
+                                ? Provider.of<ThemeProvider>(context,
+                                            listen: false)
+                                        .isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.transparent
                                 : Colors.blue,
                           ),
                           width: double.infinity,
@@ -179,11 +224,15 @@ class _ViewProfileState extends State<ViewProfile> {
                           child: Center(
                               child: Text(
                             "$followState",
-                            style: TextStyle(
-                              color: widget.isFollowed
-                                  ? Colors.black
-                                  : Colors.white,
-                            ),
+                            style: Provider.of<ThemeProvider>(context,
+                                        listen: false)
+                                    .isDarkMode
+                                ? TextStyle(color: Colors.white)
+                                : TextStyle(
+                                    color: widget.isFollowed
+                                        ? Colors.black
+                                        : Colors.white,
+                                  ),
                           ))),
                     ),
                   )),

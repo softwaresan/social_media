@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../controller/themeProvider.dart';
+
 /// Stateful widget to fetch and then display video content.
 class Videos extends StatefulWidget {
   const Videos({Key? key}) : super(key: key);
@@ -243,9 +245,15 @@ class _VideosState extends State<Videos> {
                                                                       topRight:
                                                                           Radius.circular(
                                                                               10)),
-                                                                  color: Colors
-                                                                          .grey[
-                                                                      300]),
+                                                                  color: Provider.of<ThemeProvider>(
+                                                                              context,
+                                                                              listen:
+                                                                                  false)
+                                                                          .isDarkMode
+                                                                      ? Colors.grey[
+                                                                          800]
+                                                                      : Colors.grey[
+                                                                          300]),
                                                               child: Padding(
                                                                 padding:
                                                                     const EdgeInsets

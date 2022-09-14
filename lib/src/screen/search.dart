@@ -9,6 +9,8 @@ import 'package:social_media/src/model/social_user_model.dart';
 import 'package:social_media/src/screen/chatScreen.dart';
 import 'package:social_media/src/screen/viewProfile.dart';
 
+import '../controller/themeProvider.dart';
+
 class Search extends StatefulWidget {
   @override
   State<Search> createState() => _SearchState();
@@ -24,7 +26,10 @@ class _SearchState extends State<Search> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
-                color: Colors.grey[300],
+                color: Provider.of<ThemeProvider>(context, listen: false)
+                        .isDarkMode
+                    ? Colors.grey[800]
+                    : Colors.grey[300],
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {});

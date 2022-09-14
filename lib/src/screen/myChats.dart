@@ -4,6 +4,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/controller/themeProvider.dart';
 import 'package:social_media/src/screen/chatScreen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -28,9 +29,9 @@ class _MyChatsState extends State<MyChats> {
     } else {
       return SafeArea(
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
             title: ListTile(
               contentPadding: EdgeInsets.zero,
@@ -50,7 +51,7 @@ class _MyChatsState extends State<MyChats> {
               },
               icon: Icon(
                 Icons.arrow_back_ios,
-                color: Colors.black,
+                color: Theme.of(context).primaryColor,
               ),
             ),
           ),
@@ -59,7 +60,10 @@ class _MyChatsState extends State<MyChats> {
               children: [
                 Container(
                     height: MediaQuery.of(context).size.height * 0.05,
-                    color: Colors.grey[300],
+                    color: Provider.of<ThemeProvider>(context, listen: false)
+                            .isDarkMode
+                        ? Colors.grey[800]
+                        : Colors.grey[300],
                     child: TextFormField(
                       onChanged: (value) {
                         List tempSearch = [];
