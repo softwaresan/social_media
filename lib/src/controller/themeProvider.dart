@@ -6,4 +6,10 @@ class ThemeProvider with ChangeNotifier {
     isDarkMode = !isDarkMode;
     notifyListeners();
   }
+
+  bool isSecure = false;
+  secureText() {
+    isSecure = !isSecure;
+    notifyListeners();
+  }
 }

@@ -2,30 +2,46 @@
 
 A final project for WeCode.
 
+App name: Kurd Media
+
 ## Features
 
 Authentication
 
 post photoes
 
-adding friends 
+Following friends 
 
 chat with friends
 
-Like and comment on others post
+Reels
 
-## To Do
-[ ] Authentication
+Stories
 
-[ ] splash/logo screen
+Likes/Comments
 
-[ ] Home page
+## technologies 
+flutter
 
-[ ] profile screen
+firebase storage
 
-[ ] settings
+firebase auth
 
-[ ] chat
+firebase firestore
+
+firebase cloud messaging
+
+api used for notifications
+
+## To Do after bootcamp
+[ ] live stream
+
+[ ] group chat
+
+[ ] advance design
+
+[ ] animations
+
 
 
 

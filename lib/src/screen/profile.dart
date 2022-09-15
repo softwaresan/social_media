@@ -91,14 +91,27 @@ class _ProfileState extends State<Profile> {
             Text(_socialUser.bio, style: Theme.of(context).textTheme.caption),
             SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Column(
-                  children: [
-                    Text("Posts", style: Theme.of(context).textTheme.subtitle1),
-                    Text(_myPosts.toString(),
-                        style: Theme.of(context).textTheme.subtitle1),
-                  ],
+                Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  color: Provider.of<ThemeProvider>(context, listen: false)
+                          .isDarkMode
+                      ? Colors.grey[800]
+                      : Colors.grey[200],
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Text("Posts",
+                            style: Theme.of(context).textTheme.subtitle1),
+                        Text(_myPosts.toString(),
+                            style: Theme.of(context).textTheme.subtitle1),
+                      ],
+                    ),
+                  ),
                 ),
                 InkWell(
                   onTap: () => Navigator.push(
@@ -106,13 +119,25 @@ class _ProfileState extends State<Profile> {
                       MaterialPageRoute(
                           builder: (context) => MyFollowers(
                               myFollowersUsers: _myFollowersUsers))),
-                  child: Column(
-                    children: [
-                      Text("Followers",
-                          style: Theme.of(context).textTheme.subtitle1),
-                      Text(_myFollowers.toString(),
-                          style: Theme.of(context).textTheme.subtitle1)
-                    ],
+                  child: Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    color: Provider.of<ThemeProvider>(context, listen: false)
+                            .isDarkMode
+                        ? Colors.grey[800]
+                        : Colors.grey[200],
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text("Followers",
+                              style: Theme.of(context).textTheme.subtitle1),
+                          Text(_myFollowers.toString(),
+                              style: Theme.of(context).textTheme.subtitle1)
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 InkWell(
@@ -123,13 +148,25 @@ class _ProfileState extends State<Profile> {
                             builder: (context) => MyFollowings(
                                 myFollowingsUsers: _myFollowingsUsers)));
                   },
-                  child: Column(
-                    children: [
-                      Text("Followings",
-                          style: Theme.of(context).textTheme.subtitle1),
-                      Text(_myFollowings.toString(),
-                          style: Theme.of(context).textTheme.subtitle1)
-                    ],
+                  child: Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    color: Provider.of<ThemeProvider>(context, listen: false)
+                            .isDarkMode
+                        ? Colors.grey[800]
+                        : Colors.grey[200],
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text("Followings",
+                              style: Theme.of(context).textTheme.subtitle1),
+                          Text(_myFollowings.toString(),
+                              style: Theme.of(context).textTheme.subtitle1)
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -155,11 +192,12 @@ class _ProfileState extends State<Profile> {
                                   ? Theme.of(context).primaryColor
                                   : Colors.blue)),
                       style: ElevatedButton.styleFrom(
+                          elevation: 10,
                           primary:
                               Provider.of<ThemeProvider>(context, listen: false)
                                       .isDarkMode
                                   ? Colors.grey[800]
-                                  : Colors.white))),
+                                  : Colors.grey[200]))),
               ElevatedButton(
                   onPressed: () {
                     Provider.of<MyProvider>(context, listen: false)
@@ -182,11 +220,12 @@ class _ProfileState extends State<Profile> {
                           ? Theme.of(context).primaryColor
                           : Colors.blue),
                   style: ElevatedButton.styleFrom(
+                      elevation: 10,
                       primary:
                           Provider.of<ThemeProvider>(context, listen: false)
                                   .isDarkMode
                               ? Colors.grey[800]
-                              : Colors.white))
+                              : Colors.grey[200]))
             ]),
             StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance

@@ -26,14 +26,8 @@ import '../screen/home.dart';
 
 class MyProvider with ChangeNotifier {
   int currentIndex = 0;
-
-  List<Widget> screens = [
-    Home(),
-    Search(),
-    Videos(),
-    Profile(),
-    const Setting()
-  ];
+  List titles = ["HOME", "SEARCH", "REELS", " MY PROFILE", "SETTINGS"];
+  List<Widget> screens = [Home(), Search(), Videos(), Profile(), Setting()];
   void changeScreen(int index) {
     if (index == 1) {
       userSearch = "";

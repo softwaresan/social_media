@@ -22,413 +22,451 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
+  void initState() {
+    Provider.of<MyProvider>(context, listen: false).isPosts = true;
+    Provider.of<MyProvider>(context, listen: false).posts = [];
+    Future.delayed(Duration.zero, () async {
+      await Provider.of<MyProvider>(context, listen: false).getPosts();
+      Provider.of<MyProvider>(context, listen: false).getStories();
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ConditionalBuilder(
         condition: Provider.of<MyProvider>(context).posts.isNotEmpty ||
             !Provider.of<MyProvider>(context).isPosts,
         fallback: (context) {
-          Future.delayed(Duration.zero, () async {
-            await Provider.of<MyProvider>(context, listen: false).getPosts();
-            Provider.of<MyProvider>(context, listen: false).getStories();
-          });
+          // Future.delayed(Duration.zero, () async {
+          //   await Provider.of<MyProvider>(context, listen: false).getPosts();
+          //   Provider.of<MyProvider>(context, listen: false).getStories();
+          // });
 
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         },
         builder: (context) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              await Provider.of<MyProvider>(context, listen: false).getPosts();
-              return Provider.of<MyProvider>(context, listen: false)
-                  .getStories();
-            },
-            child: ListView(
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.13,
+          return Provider.of<MyProvider>(context).posts.isEmpty
+              ? Center(child: Text("you dont have any friends"))
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    await Provider.of<MyProvider>(context, listen: false)
+                        .getPosts();
+                    return Provider.of<MyProvider>(context, listen: false)
+                        .getStories();
+                  },
                   child: ListView(
-                    scrollDirection: Axis.horizontal,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              Container(
-                                height: 66,
-                                width: 66,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    Provider.of<MyProvider>(context,
-                                            listen: false)
-                                        .socialUser!
-                                        .profileImg),
-                                radius: 30,
-                              ),
-                              InkWell(
-                                onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AddNewStory(),
-                                    )),
-                                child: CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  child: CircleAvatar(
-                                      radius: 10,
-                                      backgroundColor: Colors.lightBlueAccent,
-                                      child: FittedBox(
-                                          child: Icon(
-                                        Icons.add,
-                                        color: Colors.white,
-                                      ))),
-                                ),
-                              )
-                            ],
-                          ),
-                          Text("Add Story")
-                        ],
-                      ),
                       SizedBox(
-                        width: 10,
-                      ),
-                      ListView.separated(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
+                        height: MediaQuery.of(context).size.height * 0.13,
+                        child: ListView(
                           scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            return Column(
+                          children: [
+                            Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                InkWell(
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ShowStory(
-                                            stories: Provider.of<MyProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .stories[index]),
-                                      )),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Container(
-                                        height: 66,
-                                        width: 66,
-                                        decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                                begin: Alignment.bottomLeft,
-                                                end: Alignment.topRight,
-                                                colors: [
-                                                  Colors.yellow,
-                                                  Colors.orange,
-                                                  Colors.red,
-                                                  Colors.pink
-                                                ]),
-                                            shape: BoxShape.circle,
-                                            color: Colors.red),
+                                Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    Container(
+                                      height: 66,
+                                      width: 66,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
                                       ),
-                                      CircleAvatar(
-                                        radius: 30,
-                                        backgroundImage: NetworkImage(
-                                            Provider.of<MyProvider>(context,
-                                                        listen: false)
-                                                    .storyUser[index]
-                                                ["profileImg"]),
-                                      )
-                                    ],
-                                  ),
+                                    ),
+                                    CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                          Provider.of<MyProvider>(context,
+                                                  listen: false)
+                                              .socialUser!
+                                              .profileImg),
+                                      radius: 30,
+                                    ),
+                                    InkWell(
+                                      onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => AddNewStory(),
+                                          )),
+                                      child: CircleAvatar(
+                                        radius: 12,
+                                        backgroundColor: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        child: CircleAvatar(
+                                            radius: 10,
+                                            backgroundColor:
+                                                Colors.lightBlueAccent,
+                                            child: FittedBox(
+                                                child: Icon(
+                                              Icons.add,
+                                              color: Colors.white,
+                                            ))),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                Text(Provider.of<MyProvider>(context,
-                                        listen: false)
-                                    .storyUser[index]["name"])
+                                Text("Add Story")
                               ],
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return SizedBox(
-                              width: 10,
-                            );
-                          },
-                          itemCount:
-                              Provider.of<MyProvider>(context, listen: false)
-                                  .storyUser
-                                  .length),
-                    ],
-                  ),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: Provider.of<MyProvider>(context).posts.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                      elevation: 20,
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) {
-                                return ViewProfile(
-                                    friendUser: Provider.of<MyProvider>(context)
-                                        .users[index],
-                                    isFollowed: true);
-                              }));
-                            },
-                            child: ListTile(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 5),
-                              title: Text(Provider.of<MyProvider>(context)
-                                  .users[index]
-                                  .data()["name"]),
-                              subtitle: Text(DateFormat.yMd().add_jm().format(
-                                  DateTime.parse(
-                                      Provider.of<MyProvider>(context)
-                                          .posts[index]
-                                          .data()["dateTime"]))),
-                              leading: CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    Provider.of<MyProvider>(context)
-                                        .users[index]
-                                        .data()["profileImg"]),
-                                radius: 24,
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(Icons.more_horiz),
-                                onPressed: () {},
-                              ),
                             ),
-                          ),
-                          Divider(
-                            color: Colors.grey,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) {
-                                return Viewpost(
-                                  postId: Provider.of<MyProvider>(context)
-                                      .posts[index]
-                                      .data()["postId"],
-                                  userId: Provider.of<MyProvider>(context)
-                                      .posts[index]
-                                      .data()["uId"],
-                                  dateTime: Provider.of<MyProvider>(context)
-                                      .posts[index]
-                                      .data()["dateTime"],
-                                  numberOfLikes:
-                                      Provider.of<MyProvider>(context)
-                                          .likes[index],
-                                  profileImg: Provider.of<MyProvider>(context)
-                                      .users[index]
-                                      .data()["profileImg"],
-                                  name: Provider.of<MyProvider>(context)
-                                      .users[index]
-                                      .data()["name"],
-                                  description: Provider.of<MyProvider>(context)
-                                      .posts[index]
-                                      .data()["description"],
-                                  postImg: Provider.of<MyProvider>(context)
-                                      .posts[index]
-                                      .data()["postImage"],
-                                  isLiked: Provider.of<MyProvider>(context)
-                                      .isLiked[index],
-                                  commentsNo: Provider.of<MyProvider>(context)
-                                      .comments[index],
-                                );
-                              }));
-                            },
+                            SizedBox(
+                              width: 10,
+                            ),
+                            ListView.separated(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ShowStory(
+                                                  stories:
+                                                      Provider.of<MyProvider>(
+                                                              context,
+                                                              listen: false)
+                                                          .stories[index]),
+                                            )),
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Container(
+                                              height: 66,
+                                              width: 66,
+                                              decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                      begin:
+                                                          Alignment.bottomLeft,
+                                                      end: Alignment.topRight,
+                                                      colors: [
+                                                        Colors.yellow,
+                                                        Colors.orange,
+                                                        Colors.red,
+                                                        Colors.pink
+                                                      ]),
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.red),
+                                            ),
+                                            CircleAvatar(
+                                              radius: 30,
+                                              backgroundImage: NetworkImage(
+                                                  Provider.of<MyProvider>(
+                                                              context,
+                                                              listen: false)
+                                                          .storyUser[index]
+                                                      ["profileImg"]),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Text(Provider.of<MyProvider>(context,
+                                              listen: false)
+                                          .storyUser[index]["name"])
+                                    ],
+                                  );
+                                },
+                                separatorBuilder: (context, index) {
+                                  return SizedBox(
+                                    width: 10,
+                                  );
+                                },
+                                itemCount: Provider.of<MyProvider>(context,
+                                        listen: false)
+                                    .storyUser
+                                    .length),
+                          ],
+                        ),
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount:
+                            Provider.of<MyProvider>(context).posts.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            shadowColor: Colors.grey[300],
+                            clipBehavior: Clip.antiAliasWithSaveLayer,
+                            elevation: 1,
                             child: Column(
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: Text(
-                                      Provider.of<MyProvider>(context)
-                                          .posts[index]
-                                          .data()["description"],
-                                      style:
-                                          Theme.of(context).textTheme.subtitle1,
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Card(
-                                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                                    child: Image.network(
-                                      Provider.of<MyProvider>(context)
-                                          .posts[index]
-                                          .data()["postImage"],
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Row(
-                                    children: [
-                                      (Provider.of<MyProvider>(context)
-                                              .isLiked[index]
-                                          ? Icon(
-                                              Icons.favorite,
-                                              color: Colors.red,
-                                            )
-                                          : Icon(Icons.favorite_outline)),
-                                      Text(" " +
-                                          Provider.of<MyProvider>(context)
-                                              .likes[index]
-                                              .toString() +
-                                          " Likes"),
-                                      Spacer(),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.add_comment_outlined),
-                                          Text(" " +
-                                              Provider.of<MyProvider>(context)
-                                                  .comments[index]
-                                                  .toString() +
-                                              " Comments"),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Divider(
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      Provider.of<MyProvider>(context,
-                                              listen: false)
-                                          .socialUser!
-                                          .profileImg),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.05,
-                                    child: TextField(
-                                      controller: Provider.of<MyProvider>(
-                                              context,
-                                              listen: false)
-                                          .commentController,
-                                      onSubmitted: (value) {
-                                        Provider.of<MyProvider>(context,
-                                                listen: false)
-                                            .commentPost(
-                                                Provider.of<MyProvider>(context,
-                                                        listen: false)
-                                                    .posts[index]
-                                                    .data()["postId"],
-                                                Provider.of<MyProvider>(context,
-                                                        listen: false)
-                                                    .posts[index]
-                                                    .data()["uId"],
-                                                "myPosts");
-                                      },
-                                      decoration: InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(20))),
-                                          label: Text("Write A Comment"),
-                                          floatingLabelBehavior:
-                                              FloatingLabelBehavior.never),
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
+                                GestureDetector(
                                   onTap: () {
-                                    Provider.of<MyProvider>(context,
-                                            listen: false)
-                                        .likePost(
-                                            Provider.of<MyProvider>(context,
-                                                    listen: false)
-                                                .posts[index]
-                                                .data()["postId"],
-                                            Provider.of<MyProvider>(context,
-                                                    listen: false)
-                                                .posts[index]
-                                                .data()["uId"],
-                                            Provider.of<MyProvider>(context,
-                                                    listen: false)
-                                                .isLiked[index],
-                                            "myPosts");
-
-                                    if (Provider.of<MyProvider>(context,
-                                            listen: false)
-                                        .isLiked[index]) {
-                                      Provider.of<MyProvider>(context,
-                                                  listen: false)
-                                              .isLiked[index] =
-                                          !Provider.of<MyProvider>(context,
-                                                  listen: false)
-                                              .isLiked[index];
-                                      Provider.of<MyProvider>(context,
-                                              listen: false)
-                                          .likes[index]--;
-                                    } else {
-                                      Provider.of<MyProvider>(context,
-                                                  listen: false)
-                                              .isLiked[index] =
-                                          !Provider.of<MyProvider>(context,
-                                                  listen: false)
-                                              .isLiked[index];
-                                      Provider.of<MyProvider>(context,
-                                              listen: false)
-                                          .likes[index]++;
-                                    }
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return ViewProfile(
+                                          friendUser:
+                                              Provider.of<MyProvider>(context)
+                                                  .users[index],
+                                          isFollowed: true);
+                                    }));
                                   },
+                                  child: ListTile(
+                                    contentPadding:
+                                        EdgeInsets.symmetric(horizontal: 5),
+                                    title: Text(Provider.of<MyProvider>(context)
+                                        .users[index]
+                                        .data()["name"]),
+                                    subtitle: Text(DateFormat.yMd()
+                                        .add_jm()
+                                        .format(DateTime.parse(
+                                            Provider.of<MyProvider>(context)
+                                                .posts[index]
+                                                .data()["dateTime"]))),
+                                    leading: CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                          Provider.of<MyProvider>(context)
+                                              .users[index]
+                                              .data()["profileImg"]),
+                                      radius: 24,
+                                    ),
+                                    trailing: IconButton(
+                                      icon: Icon(Icons.more_horiz),
+                                      onPressed: () {},
+                                    ),
+                                  ),
+                                ),
+                                Divider(
+                                  color: Colors.grey,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) {
+                                      return Viewpost(
+                                        postId: Provider.of<MyProvider>(context)
+                                            .posts[index]
+                                            .data()["postId"],
+                                        userId: Provider.of<MyProvider>(context)
+                                            .posts[index]
+                                            .data()["uId"],
+                                        dateTime:
+                                            Provider.of<MyProvider>(context)
+                                                .posts[index]
+                                                .data()["dateTime"],
+                                        numberOfLikes:
+                                            Provider.of<MyProvider>(context)
+                                                .likes[index],
+                                        profileImg:
+                                            Provider.of<MyProvider>(context)
+                                                .users[index]
+                                                .data()["profileImg"],
+                                        name: Provider.of<MyProvider>(context)
+                                            .users[index]
+                                            .data()["name"],
+                                        description:
+                                            Provider.of<MyProvider>(context)
+                                                .posts[index]
+                                                .data()["description"],
+                                        postImg:
+                                            Provider.of<MyProvider>(context)
+                                                .posts[index]
+                                                .data()["postImage"],
+                                        isLiked:
+                                            Provider.of<MyProvider>(context)
+                                                .isLiked[index],
+                                        commentsNo:
+                                            Provider.of<MyProvider>(context)
+                                                .comments[index],
+                                      );
+                                    }));
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: Text(
+                                            Provider.of<MyProvider>(context)
+                                                .posts[index]
+                                                .data()["description"],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .subtitle1,
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: Card(
+                                          clipBehavior:
+                                              Clip.antiAliasWithSaveLayer,
+                                          child: Image.network(
+                                            Provider.of<MyProvider>(context)
+                                                .posts[index]
+                                                .data()["postImage"],
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Row(
+                                          children: [
+                                            (Provider.of<MyProvider>(context)
+                                                    .isLiked[index]
+                                                ? Icon(
+                                                    Icons.favorite,
+                                                    color: Colors.red,
+                                                  )
+                                                : Icon(Icons.favorite_outline)),
+                                            Text(" " +
+                                                Provider.of<MyProvider>(context)
+                                                    .likes[index]
+                                                    .toString() +
+                                                " Likes"),
+                                            Spacer(),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                    Icons.add_comment_outlined),
+                                                Text(" " +
+                                                    Provider.of<MyProvider>(
+                                                            context)
+                                                        .comments[index]
+                                                        .toString() +
+                                                    " Comments"),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(5.0),
                                   child: Row(
                                     children: [
-                                      (Provider.of<MyProvider>(context)
-                                              .isLiked[index]
-                                          ? Icon(
-                                              Icons.favorite,
-                                              color: Colors.red,
-                                            )
-                                          : Icon(Icons.favorite_outline)),
-                                      Text("Like"),
+                                      CircleAvatar(
+                                        backgroundImage: NetworkImage(
+                                            Provider.of<MyProvider>(context,
+                                                    listen: false)
+                                                .socialUser!
+                                                .profileImg),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.05,
+                                          child: TextField(
+                                            controller: Provider.of<MyProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .commentController,
+                                            onSubmitted: (value) {
+                                              Provider.of<MyProvider>(context,
+                                                      listen: false)
+                                                  .commentPost(
+                                                      Provider.of<MyProvider>(
+                                                              context,
+                                                              listen: false)
+                                                          .posts[index]
+                                                          .data()["postId"],
+                                                      Provider.of<MyProvider>(
+                                                              context,
+                                                              listen: false)
+                                                          .posts[index]
+                                                          .data()["uId"],
+                                                      "myPosts");
+                                            },
+                                            decoration: InputDecoration(
+                                                border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                                label: Text("Write A Comment"),
+                                                floatingLabelBehavior:
+                                                    FloatingLabelBehavior
+                                                        .never),
+                                          ),
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Provider.of<MyProvider>(context,
+                                                  listen: false)
+                                              .likePost(
+                                                  Provider.of<MyProvider>(
+                                                          context,
+                                                          listen: false)
+                                                      .posts[index]
+                                                      .data()["postId"],
+                                                  Provider.of<MyProvider>(
+                                                          context,
+                                                          listen: false)
+                                                      .posts[index]
+                                                      .data()["uId"],
+                                                  Provider.of<MyProvider>(
+                                                          context,
+                                                          listen: false)
+                                                      .isLiked[index],
+                                                  "myPosts");
+
+                                          if (Provider.of<MyProvider>(context,
+                                                  listen: false)
+                                              .isLiked[index]) {
+                                            Provider.of<MyProvider>(context,
+                                                        listen: false)
+                                                    .isLiked[index] =
+                                                !Provider.of<MyProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .isLiked[index];
+                                            Provider.of<MyProvider>(context,
+                                                    listen: false)
+                                                .likes[index]--;
+                                          } else {
+                                            Provider.of<MyProvider>(context,
+                                                        listen: false)
+                                                    .isLiked[index] =
+                                                !Provider.of<MyProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .isLiked[index];
+                                            Provider.of<MyProvider>(context,
+                                                    listen: false)
+                                                .likes[index]++;
+                                          }
+                                        },
+                                        child: Row(
+                                          children: [
+                                            (Provider.of<MyProvider>(context)
+                                                    .isLiked[index]
+                                                ? Icon(
+                                                    Icons.favorite,
+                                                    color: Colors.red,
+                                                  )
+                                                : Icon(Icons.favorite_outline)),
+                                            Text("Like"),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
+                    ],
+                  ),
+                );
         });
   }
 }

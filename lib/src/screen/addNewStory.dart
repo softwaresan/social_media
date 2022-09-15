@@ -9,15 +9,17 @@ import 'package:social_media/main.dart';
 import 'package:social_media/src/controller/myProvider.dart';
 import 'package:social_media/src/model/social_user_model.dart';
 
+import '../controller/themeProvider.dart';
+
 class AddNewStory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SocialUser socialUser = Provider.of<MyProvider>(context).socialUser!;
     return SafeArea(
         child: Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -90,7 +92,12 @@ class AddNewStory extends StatelessWidget {
                         Text("CAMERA", style: TextStyle(color: Colors.blue)),
                       ],
                     ),
-                    style: ElevatedButton.styleFrom(primary: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                        primary:
+                            Provider.of<ThemeProvider>(context, listen: false)
+                                    .isDarkMode
+                                ? Colors.grey[800]
+                                : Colors.grey[200])),
               ),
               Expanded(
                 child: ElevatedButton(
@@ -108,7 +115,12 @@ class AddNewStory extends StatelessWidget {
                         Text("GALLERY", style: TextStyle(color: Colors.blue)),
                       ],
                     ),
-                    style: ElevatedButton.styleFrom(primary: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                        primary:
+                            Provider.of<ThemeProvider>(context, listen: false)
+                                    .isDarkMode
+                                ? Colors.grey[800]
+                                : Colors.grey[200])),
               )
             ],
           )

@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
     if (Provider.of<MyProvider>(context).isLoading) {
       Provider.of<MyProvider>(context, listen: false).getUserData();
 
-      return CircularProgressIndicator();
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     } else {
       return SafeArea(
         child: Scaffold(
@@ -45,8 +45,14 @@ class HomePage extends StatelessWidget {
                       : Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
               title: Provider.of<MyProvider>(context).currentIndex == 2
-                  ? Text("Home", style: TextStyle(color: Colors.white))
-                  : Text("Home", style: Theme.of(context).textTheme.subtitle1),
+                  ? Text(
+                      Provider.of<MyProvider>(context).titles[
+                          Provider.of<MyProvider>(context).currentIndex],
+                      style: TextStyle(color: Colors.white))
+                  : Text(
+                      Provider.of<MyProvider>(context).titles[
+                          Provider.of<MyProvider>(context).currentIndex],
+                      style: Theme.of(context).textTheme.subtitle1),
               actions: [
                 IconButton(
                     onPressed: () {
@@ -94,36 +100,43 @@ class HomePage extends StatelessWidget {
               },
               items: [
                 BottomNavigationBarItem(
-                    icon: GestureDetector(
-                        child: Icon(
+                    icon: Icon(
                       Icons.home,
                       color: tempColor,
-                    )),
+                      size: Provider.of<MyProvider>(context).currentIndex == 0
+                          ? 35
+                          : 25,
+                    ),
                     label: "Home"),
                 BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.search,
-                      color: tempColor,
-                    ),
+                    icon: Icon(Icons.search,
+                        color: tempColor,
+                        size: Provider.of<MyProvider>(context).currentIndex == 1
+                            ? 35
+                            : 25),
                     label: "Search"),
                 BottomNavigationBarItem(
                     icon: Icon(
                       Icons.ondemand_video_sharp,
-                      size: 35,
+                      size: Provider.of<MyProvider>(context).currentIndex == 2
+                          ? 35
+                          : 25,
                       color: tempColor,
                     ),
                     label: "Reel"),
                 BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.account_circle,
-                      color: tempColor,
-                    ),
+                    icon: Icon(Icons.account_circle,
+                        color: tempColor,
+                        size: Provider.of<MyProvider>(context).currentIndex == 3
+                            ? 35
+                            : 25),
                     label: "Profile"),
                 BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.settings,
-                      color: tempColor,
-                    ),
+                    icon: Icon(Icons.settings,
+                        color: tempColor,
+                        size: Provider.of<MyProvider>(context).currentIndex == 4
+                            ? 35
+                            : 25),
                     label: "settings")
               ],
             )),

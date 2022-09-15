@@ -7,6 +7,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:provider/provider.dart';
 import 'package:social_media/main.dart';
 import 'package:social_media/src/controller/myProvider.dart';
+import 'package:social_media/src/controller/themeProvider.dart';
 import 'package:social_media/src/model/social_user_model.dart';
 import 'package:video_player/video_player.dart';
 
@@ -40,9 +41,9 @@ class _AddNewVideoState extends State<AddNewVideo> {
       _videoPlayerController.play();
       return SafeArea(
           child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
@@ -82,7 +83,10 @@ class _AddNewVideoState extends State<AddNewVideo> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Container(
-                    color: Colors.grey[300],
+                    color: Provider.of<ThemeProvider>(context, listen: false)
+                            .isDarkMode
+                        ? Colors.grey[800]
+                        : Colors.grey[300],
                     child: TextFormField(
                         decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -116,7 +120,12 @@ class _AddNewVideoState extends State<AddNewVideo> {
                           Text("CAMERA", style: TextStyle(color: Colors.blue)),
                         ],
                       ),
-                      style: ElevatedButton.styleFrom(primary: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                          primary:
+                              Provider.of<ThemeProvider>(context, listen: false)
+                                      .isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.grey[200])),
                 ),
                 Expanded(
                   child: ElevatedButton(
@@ -134,7 +143,12 @@ class _AddNewVideoState extends State<AddNewVideo> {
                           Text("GALLERY", style: TextStyle(color: Colors.blue)),
                         ],
                       ),
-                      style: ElevatedButton.styleFrom(primary: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                          primary:
+                              Provider.of<ThemeProvider>(context, listen: false)
+                                      .isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.grey[200])),
                 )
               ],
             )
